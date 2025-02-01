@@ -1,0 +1,26 @@
+services:
+  app:
+    build: ./ # Указываем текущую директорию для Dockerfile
+    # command: npm start
+    restart: always
+    ports:
+      - '3000:3000' # Локальный порт:Порт внутри контейнера
+    environment:
+      # - MONGO_URI=mongodb://mongo:27017/subscriptionDB # Подключение к MongoDB через имя сервиса
+      - TELEGRAM_TOKEN='your_token' # Токен Telegram бота
+    # depends_on:
+    #   - mongo # Указываем, что приложение зависит от сервиса MongoDB
+    volumes:
+      - .:/app # Привязываем текущую директорию к контейнеру для hot-reload при разработке
+      - /app/node_modules # Исключаем node_modules из привязки, чтобы использовать пакеты контейнера
+
+  # mongo:
+  #   image: mongo:latest
+  #   ports:
+  #     - '27017:27017' # Порт для доступа к MongoDB
+  #   volumes:
+  #     - mongo-data:/data/db # Хранилище данных MongoDB
+
+volumes:
+  mongo-data:
+    
