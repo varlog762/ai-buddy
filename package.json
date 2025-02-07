@@ -13,8 +13,9 @@
   "description": "",
   "dependencies": {
     "dotenv": "^16.4.7",
-    "node-telegram-bot-api": "^0.66.0",
-    "nodemon": "^3.1.9"
+    "node-telegram-bot-api": "^0.63.0",
+    "nodemon": "^3.1.9",
+    "openai": "^4.82.0"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
