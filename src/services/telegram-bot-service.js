@@ -1,4 +1,5 @@
 import TelegramBot from 'node-telegram-bot-api';
+import { MESSAGE, MESSAGE_FROM_TG } from '../constants/index.js';
 
 class TelegramBotService {
   chatList = new Set();
@@ -10,13 +11,13 @@ class TelegramBotService {
   }
 
   startListenMessages() {
-    this.bot.on('message', msg => {
+    this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
       const message = msg.text;
 
       this.chatList.add(chatId);
 
-      this.eventEmitter.emit('message-from-tg', { chatId, message });
+      this.eventEmitter.emit(MESSAGE_FROM_TG, { chatId, message });
     });
   }
 
