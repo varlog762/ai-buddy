@@ -6,7 +6,13 @@
   "scripts": {
     "start": "node ./src/app.js",
     "dev": "nodemon ./src/app.js localhost 8080",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "supabase:init": "supabase init",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link --project-ref=kmtocxjvllfoutbxlecq",
+    "db:migrate:new": "supabase migration new",
+    "db:reset": "supabase db reset --linked",
+    "db:seed": "node --env-file=.env database/seed.js"
   },
   "author": "",
   "license": "ISC",
@@ -25,6 +31,7 @@
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.2.3",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "supabase": "^2.9.6"
   }
 }
