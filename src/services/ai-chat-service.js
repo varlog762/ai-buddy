@@ -7,7 +7,7 @@ class AIChatService {
     this.eventEmitter = eventEmitter;
   }
 
-  async send(message) {
+  async send({ chatId, message }) {
     try {
       const completion = await this.bot.chat.completions.create({
         model: 'meta-llama/llama-3.1-70b-instruct:free',
@@ -22,12 +22,22 @@ class AIChatService {
       const responseMessage = completion?.choices[0]?.message?.content;
 
       if (!responseMessage) {
-        this.eventEmitter.emit(MESSAGE_FROM_AI, completion);
+        this.eventEmitter.emit(MESSAGE_FROM_AI, {
+          chatId,
+          message: 'Sorry, too many requests! Try again later.',
+        });
         console.log(completion);
       }
 
-      this.eventEmitter.emit(MESSAGE_FROM_AI, responseMessage);
+      this.eventEmitter.emit(MESSAGE_FROM_AI, {
+        chatId,
+        message: responseMessage,
+      });
     } catch (error) {
+      this.eventEmitter.emit(MESSAGE_FROM_AI, {
+        chatId,
+        message: 'Oops! Something went wrong. Try again later.',
+      });
       console.error(error);
     }
   }
