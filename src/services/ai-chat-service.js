@@ -5,10 +5,12 @@ import {
   GEMINI,
   DEEPSEEK,
   LLAMA,
+  ASSISTANT_ROLE,
+  SOMETHING_WENT_WRONG,
 } from '../constants/index.js';
 
 class AIChatService {
-  models = [DEEPSEEK, LLAMA, GEMINI];
+  models = [GEMINI, LLAMA, DEEPSEEK];
 
   currentModelIdx = 0;
 
@@ -34,18 +36,16 @@ class AIChatService {
       this.eventEmitter.emit(MESSAGE_FROM_AI, {
         chatId,
         message: responseMessage,
+        role: ASSISTANT_ROLE,
       });
     } catch (error) {
       this.eventEmitter.emit(MESSAGE_FROM_AI, {
         chatId,
-        message: 'Oops! Something went wrong. Try again later.',
+        message: SOMETHING_WENT_WRONG,
+        role: ASSISTANT_ROLE,
       });
 
       console.error(error);
-
-      // this.modelIdx += 1;
-
-      // this.send({ chatId, message });
     }
   }
 }

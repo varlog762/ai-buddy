@@ -1,5 +1,11 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { MESSAGE, MESSAGE_FROM_TG } from '../constants/index.js';
+import {
+  MESSAGE,
+  MESSAGE_FROM_TG,
+  USER_ROLE,
+  SYSTEM_ROLE,
+} from '../constants/index.js';
+import { splitMessageForTelegram } from '../utils/index.js';
 
 class TelegramBotService {
   chatList = new Set();
@@ -18,12 +24,16 @@ class TelegramBotService {
   startListenMessages() {
     this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
-      console.log(chatId);
+      console.log(typeof chatId);
       const message = msg.text;
 
       this.chatList.add(chatId);
 
-      this.eventEmitter.emit(MESSAGE_FROM_TG, { chatId, message });
+      this.eventEmitter.emit(MESSAGE_FROM_TG, {
+        chatId,
+        message,
+        role: USER_ROLE,
+      });
     });
   }
 
@@ -34,9 +44,13 @@ class TelegramBotService {
    */
   sendToAll(message) {
     try {
-      this.chatList.forEach(chatId =>
-        this.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' })
-      );
+      const messages = splitMessageForTelegram(message);
+
+      this.chatList.forEach(chatId => {
+        messages.forEach(msg =>
+          this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' })
+        );
+      });
     } catch (error) {
       console.error(error);
     }
@@ -51,7 +65,10 @@ class TelegramBotService {
    */
   send({ chatId, message }) {
     try {
-      this.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+      const messages = splitMessageForTelegram(message);
+      messages.forEach(msg => {
+        this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
+      });
     } catch (error) {
       console.error(error);
     }
