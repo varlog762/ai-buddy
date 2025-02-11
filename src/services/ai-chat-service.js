@@ -8,6 +8,7 @@ import {
   ASSISTANT_ROLE,
   SOMETHING_WENT_WRONG,
 } from '../constants/index.js';
+import { createMessagesHistory } from '../utils/index.js';
 
 class AIChatService {
   models = [GEMINI, LLAMA, DEEPSEEK];
@@ -19,34 +20,31 @@ class AIChatService {
     this.eventEmitter = eventEmitter;
   }
 
-  async send({ chatId, message }) {
+  async send({ chatId }) {
     try {
+      const messages = await createMessagesHistory(chatId);
+      console.log(messages);
+
       const completion = await this.bot.chat.completions.create({
         model: this.models[this.currentModelIdx],
-        messages: [
-          {
-            role: USER_ROLE,
-            content: message,
-          },
-        ],
+        messages,
       });
 
       const responseMessage = completion?.choices[0]?.message?.content;
 
-      this.eventEmitter.emit(MESSAGE_FROM_AI, {
-        chatId,
-        message: responseMessage,
-        role: ASSISTANT_ROLE,
-      });
+      this.emit(chatId, responseMessage);
     } catch (error) {
-      this.eventEmitter.emit(MESSAGE_FROM_AI, {
-        chatId,
-        message: SOMETHING_WENT_WRONG,
-        role: ASSISTANT_ROLE,
-      });
-
+      this.emit(chatId, SOMETHING_WENT_WRONG);
       console.error(error);
     }
+  }
+
+  emit(chatId, message) {
+    this.eventEmitter.emit(MESSAGE_FROM_AI, {
+      chatId,
+      message,
+      role: ASSISTANT_ROLE,
+    });
   }
 }
 

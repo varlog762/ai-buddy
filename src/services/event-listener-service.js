@@ -13,20 +13,20 @@ const eventListenerService = services => {
    * @param {Object} messageSender - The bot instance to send the message to.
    */
   const startEventListener = (eventName, messageSender) => {
-    eventEmitter.on(eventName, async ({ chatId, messageText, senderRole }) => {
-      if (!chatId || !messageText || !senderRole) {
+    eventEmitter.on(eventName, async ({ chatId, message, role }) => {
+      if (!chatId || !message || !role) {
         console.error('Invalid event data:', {
           chatId,
-          messageText,
-          senderRole,
+          message,
+          role,
         });
 
         return;
       }
 
       try {
-        await saveMessageToDB({ chatId, messageText, senderRole });
-        messageSender.send({ chatId, messageText });
+        await saveMessageToDB({ chatId, message, role });
+        messageSender.send({ chatId, message });
       } catch (error) {
         console.error(error);
       }

@@ -10,6 +10,12 @@ import { splitMessageForTelegram } from '../utils/index.js';
 class TelegramBotService {
   chatList = new Set();
 
+  /**
+   * Constructs a TelegramBotService instance.
+   *
+   * @param {string} token - The Telegram Bot API token.
+   * @param {EventEmitter} eventEmitter - The event emitter to emit events to.
+   */
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
@@ -28,6 +34,8 @@ class TelegramBotService {
       const message = msg.text;
 
       this.chatList.add(chatId);
+
+      setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 500);
 
       this.eventEmitter.emit(MESSAGE_FROM_TG, {
         chatId,
