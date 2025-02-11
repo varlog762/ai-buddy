@@ -18,6 +18,7 @@ class TelegramBotService {
   startListenMessages() {
     this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
+      console.log(chatId);
       const message = msg.text;
 
       this.chatList.add(chatId);

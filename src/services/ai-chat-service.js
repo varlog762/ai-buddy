@@ -1,7 +1,17 @@
 import OpenAI from 'openai';
-import { MESSAGE_FROM_AI, USER_ROLE } from '../constants/index.js';
+import {
+  MESSAGE_FROM_AI,
+  USER_ROLE,
+  GEMINI,
+  DEEPSEEK,
+  LLAMA,
+} from '../constants/index.js';
 
 class AIChatService {
+  models = [DEEPSEEK, LLAMA, GEMINI];
+
+  currentModelIdx = 0;
+
   constructor(baseURL, apiKey, eventEmitter) {
     this.bot = new OpenAI({ baseURL, apiKey });
     this.eventEmitter = eventEmitter;
@@ -10,7 +20,7 @@ class AIChatService {
   async send({ chatId, message }) {
     try {
       const completion = await this.bot.chat.completions.create({
-        model: 'meta-llama/llama-3.1-70b-instruct:free',
+        model: this.models[this.currentModelIdx],
         messages: [
           {
             role: USER_ROLE,
@@ -21,14 +31,6 @@ class AIChatService {
 
       const responseMessage = completion?.choices[0]?.message?.content;
 
-      if (!responseMessage) {
-        this.eventEmitter.emit(MESSAGE_FROM_AI, {
-          chatId,
-          message: 'Sorry, too many requests! Try again later.',
-        });
-        console.log(completion);
-      }
-
       this.eventEmitter.emit(MESSAGE_FROM_AI, {
         chatId,
         message: responseMessage,
@@ -38,7 +40,12 @@ class AIChatService {
         chatId,
         message: 'Oops! Something went wrong. Try again later.',
       });
+
       console.error(error);
+
+      // this.modelIdx += 1;
+
+      // this.send({ chatId, message });
     }
   }
 }
