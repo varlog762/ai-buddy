@@ -3,7 +3,7 @@ import {
   MESSAGE,
   MESSAGE_FROM_TG,
   USER_ROLE,
-  SYSTEM_ROLE,
+  SOMETHING_WENT_WRONG,
 } from '../constants/index.js';
 import { splitMessageForTelegram } from '../utils/index.js';
 
@@ -30,12 +30,9 @@ class TelegramBotService {
   startListenMessages() {
     this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
-      console.log(typeof chatId);
       const message = msg.text;
 
-      this.chatList.add(chatId);
-
-      setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 500);
+      setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 700);
 
       this.eventEmitter.emit(MESSAGE_FROM_TG, {
         chatId,
@@ -46,38 +43,24 @@ class TelegramBotService {
   }
 
   /**
-   * Sends a message to all chat IDs stored in the chatList.
-   *
-   * @param {string} message - The message to be sent to all chat IDs.
-   */
-  sendToAll(message) {
-    try {
-      const messages = splitMessageForTelegram(message);
-
-      this.chatList.forEach(chatId => {
-        messages.forEach(msg =>
-          this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' })
-        );
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  /**
    * Sends a message to a specific chat ID.
    *
    * @param {Object} params - The parameters for sending a message.
    * @param {number} params.chatId - The ID of the chat where the message will be sent.
    * @param {string} params.message - The message to be sent.
    */
-  send({ chatId, message }) {
+  async send({ chatId, message }) {
     try {
-      const messages = splitMessageForTelegram(message);
-      messages.forEach(msg => {
-        this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
-      });
+      this.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+
+      // const messages = splitMessageForTelegram(message);
+      // // eslint-disable-next-line no-restricted-syntax
+      // for (const msg of messages) {
+      //   // eslint-disable-next-line no-await-in-loop
+      //   await this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
+      // }
     } catch (error) {
+      await this.bot.sendMessage(chatId, SOMETHING_WENT_WRONG);
       console.error(error);
     }
   }

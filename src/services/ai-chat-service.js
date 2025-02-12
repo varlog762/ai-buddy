@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import {
   MESSAGE_FROM_AI,
   USER_ROLE,
+  SYSTEM_ROLE,
   GEMINI,
   DEEPSEEK,
   LLAMA,
@@ -22,11 +23,11 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
+      const model = this.models[this.currentModelIdx];
       const messages = await createMessagesHistory(chatId);
-      console.log(messages);
 
       const completion = await this.bot.chat.completions.create({
-        model: this.models[this.currentModelIdx],
+        model,
         messages,
       });
 
