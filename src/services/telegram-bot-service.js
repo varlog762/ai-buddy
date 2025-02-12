@@ -4,8 +4,9 @@ import {
   MESSAGE_FROM_TG,
   USER_ROLE,
   SOMETHING_WENT_WRONG,
+  CLEAR_CHAT_HISTORY,
 } from '../constants/index.js';
-import { splitMessageForTelegram } from '../utils/index.js';
+// import { splitMessageForTelegram } from '../utils/index.js';
 
 class TelegramBotService {
   chatList = new Set();
@@ -31,15 +32,25 @@ class TelegramBotService {
     this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
       const message = msg.text;
+      console.log(message);
 
       setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 700);
 
-      this.eventEmitter.emit(MESSAGE_FROM_TG, {
-        chatId,
-        message,
-        role: USER_ROLE,
-      });
+      this.handleMessages(chatId, message);
     });
+  }
+
+  handleMessages(chatId, message) {
+    switch (message) {
+      case '/start':
+        this.handleStartCommand(chatId);
+        break;
+      case '/clear':
+        this.emit(CLEAR_CHAT_HISTORY, chatId);
+        break;
+      default:
+        this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
+    }
   }
 
   /**
@@ -64,6 +75,12 @@ class TelegramBotService {
       console.error(error);
     }
   }
+
+  emit(event, payload) {
+    this.eventEmitter.emit(event, payload);
+  }
+
+  handleStartCommand(chatId) {}
 }
 
 export default TelegramBotService;
