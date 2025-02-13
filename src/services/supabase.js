@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   SOMETHING_WENT_WRONG,
   DATABASE_SAVING_ERROR,
-  CHAT_HISTORY_ERROR,
+  CHAT_DATA_ERROR,
 } from '../constants/index.js';
 
 const { SUPABASE_URL, SUPABASE_API_KEY } = process.env;
@@ -46,7 +46,7 @@ export const getChatData = async chatId => {
     .single();
 
   if (error) {
-    console.error('Error getting chat data:', error.message);
+    console.error(`${CHAT_DATA_ERROR}: ${error.message}`);
     return [];
   }
 
