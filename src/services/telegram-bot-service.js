@@ -5,21 +5,17 @@ import {
   USER_ROLE,
   SOMETHING_WENT_WRONG,
   CLEAR_CHAT_HISTORY,
+  LLAMA,
+  DEEPSEEK,
+  GEMINI,
 } from '../constants/index.js';
 // import { splitMessageForTelegram } from '../utils/index.js';
 
 class TelegramBotService {
-  chatList = new Set();
-
-  /**
-   * Constructs a TelegramBotService instance.
-   *
-   * @param {string} token - The Telegram Bot API token.
-   * @param {EventEmitter} eventEmitter - The event emitter to emit events to.
-   */
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
+    this.callbackQueryListener = null;
   }
 
   /**
@@ -32,25 +28,27 @@ class TelegramBotService {
     this.bot.on(MESSAGE, msg => {
       const chatId = msg.chat.id;
       const message = msg.text;
-      console.log(message);
-
-      setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 700);
 
       this.handleMessages(chatId, message);
     });
   }
 
+  // eslint-disable-next-line consistent-return
   handleMessages(chatId, message) {
-    switch (message) {
-      case '/start':
-        this.handleStartCommand(chatId);
-        break;
-      case '/clear':
-        this.emit(CLEAR_CHAT_HISTORY, chatId);
-        break;
-      default:
-        this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
+    if (message === '/start') {
+      return this.handleStartCommand(chatId);
     }
+
+    if (message === '/clear') {
+      return this.emit(CLEAR_CHAT_HISTORY, chatId);
+    }
+
+    if (message === '/change-model') {
+      return this.handleChangeModelCommand(chatId);
+    }
+
+    this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
+    setTimeout(() => this.bot.sendChatAction(chatId, 'typing'), 700);
   }
 
   /**
@@ -63,13 +61,6 @@ class TelegramBotService {
   async send({ chatId, message }) {
     try {
       this.bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
-
-      // const messages = splitMessageForTelegram(message);
-      // // eslint-disable-next-line no-restricted-syntax
-      // for (const msg of messages) {
-      //   // eslint-disable-next-line no-await-in-loop
-      //   await this.bot.sendMessage(chatId, msg, { parse_mode: 'Markdown' });
-      // }
     } catch (error) {
       await this.bot.sendMessage(chatId, SOMETHING_WENT_WRONG);
       console.error(error);
@@ -80,7 +71,47 @@ class TelegramBotService {
     this.eventEmitter.emit(event, payload);
   }
 
-  handleStartCommand(chatId) {}
+  async handleStartCommand(chatId) {
+    const message = 'Привет! Выберите модель LLM:';
+
+    const keyboard = {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: '🔵 Llama 3.1 70b', callback_data: LLAMA }],
+          [{ text: '🟢 Gemini 2.0', callback_data: GEMINI }],
+          [{ text: '🟡 DeepSeek R1', callback_data: DEEPSEEK }],
+        ],
+      },
+    };
+
+    await this.bot.sendMessage(chatId, message, keyboard);
+
+    this.startListeningForModelSelection();
+  }
+
+  startListeningForModelSelection() {
+    if (this.callbackQueryListener) {
+      this.bot.removeListener('callback_query', this.callbackQueryListener);
+    }
+
+    this.callbackQueryListener = async query => {
+      const chatId = query.message.chat.id;
+      const selectedModel = query.data;
+
+      await this.bot.sendMessage(chatId, `Вы выбрали модель: ${selectedModel}`);
+
+      await this.bot.deleteMessage(chatId, query.message.message_id);
+
+      // Вызываем событие для сохранения модели
+      // this.emit('LLM_SELECTED', { chatId, model: selectedModel });
+
+      // Удаляем слушатель, чтобы не ловить старые callback_query
+      this.bot.removeListener('callback_query', this.callbackQueryListener);
+      this.callbackQueryListener = null;
+    };
+
+    this.bot.on('callback_query', this.callbackQueryListener);
+  }
 }
 
 export default TelegramBotService;
