@@ -35,19 +35,38 @@ export const saveMessageToDB = async ({ chatId, role, message }) => {
   }
 };
 
-export const getChatHistory = async chatId => {
-  if (!chatId) return [];
+export const getChatData = async chatId => {
+  if (!chatId) return null;
 
   const { data, error } = await supabase
-    .from('messages')
-    .select('role, content')
+    .from('chats')
+    .select('model, messages:messages(role, content)')
     .eq('chat_id', chatId)
-    .order('created_at', { ascending: true });
+    .order('messages.created_at', { ascending: true }) // сортируем сообщения по времени
+    .single();
 
   if (error) {
-    console.error(CHAT_HISTORY_ERROR, error.message);
+    console.error('Error getting chat data:', error.message);
     return [];
   }
 
   return data;
+};
+
+export const updateLLM = async (chatId, model) => {
+  if (!chatId) {
+    return;
+  }
+
+  if (!model) {
+    throw new Error('Model cannot be null or undefined');
+  }
+
+  const { error } = await supabase
+    .from('chats')
+    .upsert({ chat_id: chatId, model }, { onConflict: ['chat_id'] });
+
+  if (error) {
+    console.error('Error updating model:', error.message);
+  }
 };

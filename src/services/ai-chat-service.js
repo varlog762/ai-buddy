@@ -1,19 +1,12 @@
 import OpenAI from 'openai';
 import {
   MESSAGE_FROM_AI,
-  GEMINI,
-  DEEPSEEK,
-  LLAMA,
   ASSISTANT_ROLE,
   SOMETHING_WENT_WRONG,
 } from '../constants/index.js';
-import { createMessagesHistory } from '../utils/index.js';
+import { getChatData } from './supabase.js';
 
 class AIChatService {
-  models = [GEMINI, LLAMA, DEEPSEEK];
-
-  currentModelIdx = 0;
-
   constructor(baseURL, apiKey, eventEmitter) {
     this.bot = new OpenAI({ baseURL, apiKey });
     this.eventEmitter = eventEmitter;
@@ -21,8 +14,7 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
-      const model = LLAMA;
-      const messages = await createMessagesHistory(chatId);
+      const { messages, model } = await getChatData(chatId);
 
       const completion = await this.bot.chat.completions.create({
         model,
