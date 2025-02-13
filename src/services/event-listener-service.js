@@ -1,4 +1,9 @@
-import { MESSAGE_FROM_AI, MESSAGE_FROM_TG } from '../constants/index.js';
+import {
+  MESSAGE_FROM_AI,
+  MESSAGE_FROM_TG,
+  CLEAR_CHAT_HISTORY,
+  LLM_SELECTED,
+} from '../constants/index.js';
 import { saveMessageToDB } from './supabase.js';
 
 const eventListenerService = services => {
@@ -35,6 +40,14 @@ const eventListenerService = services => {
 
   startEventListener(MESSAGE_FROM_TG, aiBot);
   startEventListener(MESSAGE_FROM_AI, telegramBot);
+
+  eventEmitter.on(CLEAR_CHAT_HISTORY, async chatId => {
+    console.log(`History cleared for chat ${chatId}`);
+  });
+
+  eventEmitter.on(LLM_SELECTED, async ({ chatId, model }) => {
+    console.log(`Selected ${model} for chat ${chatId}`);
+  });
 };
 
 export default eventListenerService;

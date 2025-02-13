@@ -2,6 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import {
   MESSAGE,
   MESSAGE_FROM_TG,
+  LLM_SELECTED,
   USER_ROLE,
   SOMETHING_WENT_WRONG,
   CLEAR_CHAT_HISTORY,
@@ -9,7 +10,6 @@ import {
   DEEPSEEK,
   GEMINI,
 } from '../constants/index.js';
-// import { splitMessageForTelegram } from '../utils/index.js';
 
 class TelegramBotService {
   constructor(token, eventEmitter) {
@@ -89,27 +89,42 @@ class TelegramBotService {
     this.startListeningForModelSelection();
   }
 
+  /**
+   * Starts listening for model selection via callback queries.
+   *
+   * Ensures that any existing listener is removed before adding a new one.
+   * When a model is selected, it sends a confirmation message, deletes the original message,
+   * and emits an event indicating the model selection.
+   */
   startListeningForModelSelection() {
+    // Remove the existing callback query listener if it exists
     if (this.callbackQueryListener) {
       this.bot.removeListener('callback_query', this.callbackQueryListener);
     }
 
-    this.callbackQueryListener = async query => {
-      const chatId = query.message.chat.id;
-      const selectedModel = query.data;
+    // Define the callback query listener
+    this.callbackQueryListener = async callbackQuery => {
+      const chatId = callbackQuery.message.chat.id;
+      const model = callbackQuery.data;
 
-      await this.bot.sendMessage(chatId, `Вы выбрали модель: ${selectedModel}`);
+      // Send confirmation message to the user
+      await this.send({
+        chatId,
+        message: `You have selected the model: ${model}`,
+      });
 
-      await this.bot.deleteMessage(chatId, query.message.message_id);
+      // Delete the original message with the model selection options
+      await this.bot.deleteMessage(chatId, callbackQuery.message.message_id);
 
-      // Вызываем событие для сохранения модели
-      // this.emit('LLM_SELECTED', { chatId, model: selectedModel });
+      // Emit an event indicating that a model has been selected
+      this.emit(LLM_SELECTED, { chatId, model });
 
-      // Удаляем слушатель, чтобы не ловить старые callback_query
+      // Remove the listener after handling the callback query
       this.bot.removeListener('callback_query', this.callbackQueryListener);
       this.callbackQueryListener = null;
     };
 
+    // Add the new callback query listener
     this.bot.on('callback_query', this.callbackQueryListener);
   }
 }
