@@ -6,23 +6,11 @@ import {
   USER_ROLE,
   SOMETHING_WENT_WRONG,
   CLEAR_CHAT_HISTORY,
-  LLAMA,
-  DEEPSEEK,
-  GEMINI,
+  STARTING_MESSAGE,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
 
 class TelegramBotService {
-  modelsInlineKeyboard = {
-    reply_markup: {
-      inline_keyboard: [
-        [{ text: 'Llama 3.1 70b', callback_data: LLAMA }],
-        [{ text: 'Gemini 2.0', callback_data: GEMINI }],
-        [{ text: 'DeepSeek R1', callback_data: DEEPSEEK }],
-      ],
-    },
-  };
-
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
@@ -49,7 +37,11 @@ class TelegramBotService {
     ensureChatExists(chatId);
 
     if (message === '/start') {
-      return this.handleStartCommand(chatId);
+      return this.handleCommand(
+        chatId,
+        STARTING_MESSAGE,
+        this.modelsInlineKeyboard
+      );
     }
 
     if (message === '/clear') {
