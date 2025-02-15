@@ -2,6 +2,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import {
   MESSAGE,
+  CALLBACK_QUERY,
   MESSAGE_FROM_TG,
   LLM_SELECTED,
   USER_ROLE,
@@ -35,10 +36,8 @@ class TelegramBotService {
   }
 
   /**
-   * Starts listening for messages in the Telegram Bot API.
-   *
-   * Once a message is received, it is processed and an event is emitted
-   * with the chat ID and message.
+   * Listens for incoming messages and passes them to the
+   * handleMessages method for further processing.
    */
   startListenMessages() {
     this.bot.on(MESSAGE, msg => {
@@ -49,13 +48,24 @@ class TelegramBotService {
     });
   }
 
+  /**
+   * Listens for user selections via callback queries.
+   * When a user selects an option, the callback query is received here.
+   * The chat ID and user selection are extracted from the query.
+   * The message ID of the original message that triggered the query is also extracted.
+   * The message is then deleted using the deleteMessage method.
+   */
   startListenUserSelection() {
-    this.bot.on('callback_query', async callbackQuery => {
+    this.bot.on(CALLBACK_QUERY, async callbackQuery => {
       const chatId = callbackQuery?.message?.chat?.id;
       const userSelection = callbackQuery?.data;
       const messageId = callbackQuery?.message?.message_id;
 
+      // Delete the original message that triggered the query
       this.deleteMessage(chatId, messageId);
+
+      // Handle the user selection
+      this.handleChangeModelSelection(chatId, userSelection);
     });
   }
 
@@ -73,6 +83,7 @@ class TelegramBotService {
         }),
       '/clear': () => this.emit(CLEAR_CHAT_HISTORY, chatId),
       '/change-model': () => this.handleChangeModelCommand(chatId),
+      '/show-model': () => console.log('show model'),
     };
 
     if (commands[message]) {
