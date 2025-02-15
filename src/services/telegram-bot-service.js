@@ -9,6 +9,10 @@ import {
   STARTING_MESSAGE,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
+import {
+  modelSelectionKeyboard,
+  defaultOptionKeyboard,
+} from '../utils/inline-keyboards.js';
 
 class TelegramBotService {
   constructor(token, eventEmitter) {
@@ -40,7 +44,8 @@ class TelegramBotService {
       return this.handleCommand(
         chatId,
         STARTING_MESSAGE,
-        this.modelsInlineKeyboard
+        defaultOptionKeyboard,
+        () => {}
       );
     }
 
@@ -83,29 +88,12 @@ class TelegramBotService {
   }
 
   async handleCommand(chatId, message, inlineKeyboard, cb) {
-    await this.bot.sendMessage(chatId, message, inlineKeyboard);
+    await this.bot.sendMessage(chatId, message, {
+      parse_mode: 'Markdown',
+      ...inlineKeyboard,
+    });
 
-    // Start listening for model selection via callback queries
     cb();
-  }
-
-  /**
-   * Handles the /start command.
-   *
-   * It sends a message with a list of available LLM models and starts listening
-   * for model selection via callback queries.
-   *
-   * @param {number} chatId - The ID of the chat where the /start command was sent.
-   */
-  async handleStartCommand(chatId) {
-    // Send the message with the list of available LLM models
-    const message = 'Привет! Выберите модель LLM:';
-
-    // Send the message with the inline keyboard
-    await this.bot.sendMessage(chatId, message, this.modelsInlineKeyboard);
-
-    // Start listening for model selection via callback queries
-    this.startListeningForModelSelection();
   }
 
   /**
