@@ -10,8 +10,19 @@ import {
   DEEPSEEK,
   GEMINI,
 } from '../constants/index.js';
+import { ensureChatExists } from './supabase.js';
 
 class TelegramBotService {
+  modelsInlineKeyboard = {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Llama 3.1 70b', callback_data: LLAMA }],
+        [{ text: 'Gemini 2.0', callback_data: GEMINI }],
+        [{ text: 'DeepSeek R1', callback_data: DEEPSEEK }],
+      ],
+    },
+  };
+
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
@@ -35,6 +46,8 @@ class TelegramBotService {
 
   // eslint-disable-next-line consistent-return
   handleMessages(chatId, message) {
+    ensureChatExists(chatId);
+
     if (message === '/start') {
       return this.handleStartCommand(chatId);
     }
@@ -67,25 +80,39 @@ class TelegramBotService {
     }
   }
 
+  /**
+   * Emits an event on the event emitter with the given payload.
+   *
+   * @param {string} event - The name of the event to emit.
+   * @param {Object} payload - The payload to be sent with the event.
+   */
   emit(event, payload) {
     this.eventEmitter.emit(event, payload);
   }
 
+  async handleCommand(chatId, message, inlineKeyboard, cb) {
+    await this.bot.sendMessage(chatId, message, inlineKeyboard);
+
+    // Start listening for model selection via callback queries
+    cb();
+  }
+
+  /**
+   * Handles the /start command.
+   *
+   * It sends a message with a list of available LLM models and starts listening
+   * for model selection via callback queries.
+   *
+   * @param {number} chatId - The ID of the chat where the /start command was sent.
+   */
   async handleStartCommand(chatId) {
+    // Send the message with the list of available LLM models
     const message = 'Привет! Выберите модель LLM:';
 
-    const keyboard = {
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: '🔵 Llama 3.1 70b', callback_data: LLAMA }],
-          [{ text: '🟢 Gemini 2.0', callback_data: GEMINI }],
-          [{ text: '🟡 DeepSeek R1', callback_data: DEEPSEEK }],
-        ],
-      },
-    };
+    // Send the message with the inline keyboard
+    await this.bot.sendMessage(chatId, message, this.modelsInlineKeyboard);
 
-    await this.bot.sendMessage(chatId, message, keyboard);
-
+    // Start listening for model selection via callback queries
     this.startListeningForModelSelection();
   }
 

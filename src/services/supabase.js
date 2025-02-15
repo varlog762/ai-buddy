@@ -4,6 +4,8 @@ import {
   SOMETHING_WENT_WRONG,
   DATABASE_SAVING_ERROR,
   CHAT_DATA_ERROR,
+  FALSY_MODEL_ERROR,
+  LLAMA,
 } from '../constants/index.js';
 
 const { SUPABASE_URL, SUPABASE_API_KEY } = process.env;
@@ -35,22 +37,35 @@ export const saveMessageToDB = async ({ chatId, role, message }) => {
   }
 };
 
+// TODO: separate this to a 2 methods
 export const getChatData = async chatId => {
   if (!chatId) return null;
 
-  const { data, error } = await supabase
+  // Получаем текущую модель чата
+  const { data: chatData, error: chatError } = await supabase
     .from('chats')
-    .select('model, messages:messages(role, content)')
+    .select('model')
     .eq('chat_id', chatId)
-    .order('messages.created_at', { ascending: true }) // сортируем сообщения по времени
     .single();
 
-  if (error) {
-    console.error(`${CHAT_DATA_ERROR}: ${error.message}`);
-    return [];
+  if (chatError) {
+    console.error(`${CHAT_DATA_ERROR}: ${chatError.message}`);
+    return null;
   }
 
-  return data;
+  // Получаем сообщения, отсортированные по времени
+  const { data: messages, error: messagesError } = await supabase
+    .from('messages')
+    .select('role, content')
+    .eq('chat_id', chatId)
+    .order('created_at', { ascending: true });
+
+  if (messagesError) {
+    console.error(`${CHAT_DATA_ERROR}: ${messagesError.message}`);
+    return null;
+  }
+
+  return { model: chatData.model, messages };
 };
 
 export const updateLLM = async (chatId, model) => {
@@ -59,7 +74,7 @@ export const updateLLM = async (chatId, model) => {
   }
 
   if (!model) {
-    throw new Error('Model cannot be null or undefined');
+    throw new Error(FALSY_MODEL_ERROR);
   }
 
   const { error } = await supabase
@@ -68,5 +83,27 @@ export const updateLLM = async (chatId, model) => {
 
   if (error) {
     console.error('Error updating model:', error.message);
+  }
+};
+
+export const ensureChatExists = async chatId => {
+  const { error } = await supabase
+    .from('chats')
+    .select('chat_id')
+    .eq('chat_id', chatId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      const { error: insertError } = await supabase
+        .from('chats')
+        .insert({ chat_id: chatId, model: LLAMA });
+
+      if (insertError) {
+        console.error('Ошибка создания чата:', insertError.message);
+      }
+    } else {
+      console.error('Ошибка проверки чата:', error.message);
+    }
   }
 };
