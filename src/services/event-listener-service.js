@@ -9,7 +9,7 @@ import { saveMessageToDB } from './supabase.js';
 const eventListenerService = services => {
   const { eventEmitter, telegramBot, aiBot } = services;
 
-  telegramBot.startListenMessages();
+  telegramBot.startListeners();
 
   /**
    * Listens for a specific event and sends the message to the given bot.

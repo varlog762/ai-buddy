@@ -13,8 +13,8 @@ export const modelSelectionKeyboard = {
 export const defaultOptionKeyboard = {
   reply_markup: {
     inline_keyboard: [
-      [{ text: '🔄 Change Model', callback_data: 'change_model' }],
-      [{ text: '✅ Keep Default', callback_data: 'keep_default' }],
+      [{ text: '🔄 Change Model', callback_data: 'change-model' }],
+      [{ text: '✅ Keep Default', callback_data: 'keep-default' }],
     ],
   },
 };

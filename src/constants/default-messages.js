@@ -20,3 +20,5 @@ This is an advanced AI-powered chat bot for Telegram, designed for intelligent a
 ⚠️ *If a model is temporarily unavailable due to high demand (you may receive errors), consider switching to another or waiting for access to be restored.*  
 
 Would you like to change the model now or keep the default one?`;
+
+export const CHOOSE_MODEL_MESSAGE = `*Choose a model:*`;
