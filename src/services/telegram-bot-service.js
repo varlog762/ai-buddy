@@ -1,10 +1,6 @@
 /* eslint-disable consistent-return */
 import TelegramBot from 'node-telegram-bot-api';
 import {
-  MESSAGE,
-  CALLBACK_QUERY,
-  MESSAGE_FROM_TG,
-  LLM_SELECTED,
   USER_ROLE,
   SOMETHING_WENT_WRONG,
   CLEAR_CHAT_HISTORY,
@@ -45,6 +41,8 @@ class TelegramBotService {
       const chatId = msg.chat.id;
       const message = msg.text;
 
+      ensureChatExists(chatId);
+
       this.handleMessages(chatId, message);
     });
   }
@@ -62,25 +60,33 @@ class TelegramBotService {
       const userSelection = callbackQuery?.data;
       const messageId = callbackQuery?.message?.message_id;
 
+      ensureChatExists(chatId);
+
       // Delete the original message that triggered the query
       this.deleteMessage(chatId, messageId);
 
-      // Handle the user selection
-      this.handleChangeModelSelection(chatId, userSelection);
+      this.handleUserSelection(chatId, userSelection);
     });
   }
 
   async handleMessages(chatId, message) {
     if (!message) return;
 
-    ensureChatExists(chatId);
+    const isMessageCommand = this.handleCommands(chatId, message);
 
+    if (!isMessageCommand) {
+      this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
+      this.showTypingIndicator(chatId);
+    }
+  }
+
+  handleCommands(chatId, message) {
     const commands = {
       [COMMANDS.START]: () =>
         this.send({
           chatId,
           message: STARTING_MESSAGE,
-          inlineKeyboard: modelSelectionKeyboard,
+          inlineKeyboard: defaultOptionKeyboard,
         }),
       [COMMANDS.CLEAR]: () => this.emit(CLEAR_CHAT_HISTORY, chatId),
       [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
@@ -91,9 +97,7 @@ class TelegramBotService {
       return commands[message]();
     }
 
-    this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
-
-    this.showTypingIndicator(chatId);
+    return false;
   }
 
   handleUserSelection(chatId, userSelection) {}
@@ -155,19 +159,16 @@ class TelegramBotService {
   }
 
   async handleStartCommandSelection(chatId, userSelection) {
-    console.log('i am here');
-    console.log(chatId, userSelection);
-    if (!chatId || !userSelection || userSelection === 'keep-default') {
-      this.removeCallbackQueryListener();
-      return;
+    if (!chatId || !userSelection || userSelection === 'change-model') {
+      this.send({
+        chatId,
+        message: CHOOSE_MODEL_MESSAGE,
+        inlineKeyboard: modelSelectionKeyboard,
+      });
     }
-
-    console.log(await this.callbackQueryListener());
   }
 
   async handleChangeModelSelection(chatId, userSelection) {
-    console.log('i am too:', chatId, userSelection);
-    // Send confirmation message to the user
     await this.send({
       chatId,
       message: `You have selected the model: ${userSelection}`,
