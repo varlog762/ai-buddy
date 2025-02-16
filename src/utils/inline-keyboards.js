@@ -1,11 +1,11 @@
-import { LLAMA, DEEPSEEK, GEMINI } from '../constants/index.js';
+import { AI_MODELS } from '../constants/index.js';
 
 export const modelSelectionKeyboard = {
   reply_markup: {
     inline_keyboard: [
-      [{ text: 'Llama 3.1 70b', callback_data: LLAMA }],
-      [{ text: 'Gemini 2.0', callback_data: GEMINI }],
-      [{ text: 'DeepSeek R1', callback_data: DEEPSEEK }],
+      [{ text: 'Llama 3.1 70b', callback_data: AI_MODELS.LLAMA }],
+      [{ text: 'Gemini 2.0', callback_data: AI_MODELS.GEMINI }],
+      [{ text: 'DeepSeek R1', callback_data: AI_MODELS.DEEPSEEK }],
     ],
   },
 };

@@ -5,7 +5,7 @@ import {
   DATABASE_SAVING_ERROR,
   CHAT_DATA_ERROR,
   FALSY_MODEL_ERROR,
-  LLAMA,
+  AI_MODELS,
 } from '../constants/index.js';
 
 const { SUPABASE_URL, SUPABASE_API_KEY } = process.env;
@@ -97,7 +97,7 @@ export const ensureChatExists = async chatId => {
     if (error.code === 'PGRST116') {
       const { error: insertError } = await supabase
         .from('chats')
-        .insert({ chat_id: chatId, model: LLAMA });
+        .insert({ chat_id: chatId, model: AI_MODELS.LLAMA });
 
       if (insertError) {
         console.error('Ошибка создания чата:', insertError.message);

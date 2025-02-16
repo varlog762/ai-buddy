@@ -1,18 +1,19 @@
 /* eslint-disable consistent-return */
 import TelegramBot from 'node-telegram-bot-api';
 import {
-  USER_ROLE,
   SOMETHING_WENT_WRONG,
-  CLEAR_CHAT_HISTORY,
   STARTING_MESSAGE,
   CHOOSE_MODEL_MESSAGE,
   COMMANDS,
+  EVENTS,
+  CHAT_ROLES,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
 import {
   modelSelectionKeyboard,
   defaultOptionKeyboard,
 } from '../utils/inline-keyboards.js';
+import { isCommand, isModel } from '../utils/index.js';
 
 class TelegramBotService {
   constructor(token, eventEmitter) {
@@ -37,11 +38,15 @@ class TelegramBotService {
    * handleMessages method for further processing.
    */
   startListenMessages() {
-    this.bot.on(MESSAGE, msg => {
+    this.bot.on(EVENTS.MESSAGE, msg => {
       const chatId = msg.chat.id;
       const message = msg.text;
 
       ensureChatExists(chatId);
+
+      if (isCommand(message)) {
+        return this.handleCommands(chatId, message);
+      }
 
       this.handleMessages(chatId, message);
     });
@@ -55,7 +60,7 @@ class TelegramBotService {
    * The message is then deleted using the deleteMessage method.
    */
   startListenUserSelection() {
-    this.bot.on(CALLBACK_QUERY, async callbackQuery => {
+    this.bot.on(EVENTS.CALLBACK_QUERY, async callbackQuery => {
       const chatId = callbackQuery?.message?.chat?.id;
       const userSelection = callbackQuery?.data;
       const messageId = callbackQuery?.message?.message_id;
@@ -72,12 +77,12 @@ class TelegramBotService {
   async handleMessages(chatId, message) {
     if (!message) return;
 
-    const isMessageCommand = this.handleCommands(chatId, message);
-
-    if (!isMessageCommand) {
-      this.emit(MESSAGE_FROM_TG, { chatId, message, role: USER_ROLE });
-      this.showTypingIndicator(chatId);
-    }
+    this.emit(EVENTS.MESSAGE_FROM_TG, {
+      chatId,
+      message,
+      role: CHAT_ROLES.USER,
+    });
+    this.showTypingIndicator(chatId);
   }
 
   handleCommands(chatId, message) {
@@ -88,7 +93,7 @@ class TelegramBotService {
           message: STARTING_MESSAGE,
           inlineKeyboard: defaultOptionKeyboard,
         }),
-      [COMMANDS.CLEAR]: () => this.emit(CLEAR_CHAT_HISTORY, chatId),
+      [COMMANDS.CLEAR]: () => this.emit(EVENTS.CLEAR_CHAT_HISTORY, chatId),
       [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
       [COMMANDS.SHOW_MODEL]: () => console.log('show model'),
     };
@@ -96,11 +101,15 @@ class TelegramBotService {
     if (commands[message]) {
       return commands[message]();
     }
-
-    return false;
   }
 
-  handleUserSelection(chatId, userSelection) {}
+  handleUserSelection(chatId, userSelection) {
+    this.handleStartCommandSelection(chatId, userSelection);
+
+    if (isModel(userSelection)) {
+      return this.handleChangeModelSelection(chatId, userSelection);
+    }
+  }
 
   async showTypingIndicator(chatId, timer = 700) {
     setTimeout(async () => {
@@ -159,7 +168,7 @@ class TelegramBotService {
   }
 
   async handleStartCommandSelection(chatId, userSelection) {
-    if (!chatId || !userSelection || userSelection === 'change-model') {
+    if (userSelection === 'change-model') {
       this.send({
         chatId,
         message: CHOOSE_MODEL_MESSAGE,
@@ -175,7 +184,7 @@ class TelegramBotService {
     });
 
     // Emit an event indicating that a model has been selected
-    this.emit(LLM_SELECTED, { chatId, userSelection });
+    this.emit(EVENTS.LLM_SELECTED, { chatId, userSelection });
   }
 }
 

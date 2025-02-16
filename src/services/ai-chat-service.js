@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import {
-  MESSAGE_FROM_AI,
-  ASSISTANT_ROLE,
+  EVENTS,
+  CHAT_ROLES,
   SOMETHING_WENT_WRONG,
 } from '../constants/index.js';
 import { getChatData } from './supabase.js';
@@ -31,10 +31,10 @@ class AIChatService {
   }
 
   emit(chatId, message) {
-    this.eventEmitter.emit(MESSAGE_FROM_AI, {
+    this.eventEmitter.emit(EVENTS.MESSAGE_FROM_AI, {
       chatId,
       message,
-      role: ASSISTANT_ROLE,
+      role: CHAT_ROLES.ASSISTANT,
     });
   }
 }

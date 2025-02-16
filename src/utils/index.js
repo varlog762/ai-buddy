@@ -1,4 +1,11 @@
-import { MAX_TELEGRAM_CONTENT_LENGTH } from '../constants/index.js';
+import {
+  MAX_TELEGRAM_CONTENT_LENGTH,
+  COMMANDS,
+  AI_MODELS,
+} from '../constants/index.js';
+
+const COMMANDS_SET = new Set(Object.values(COMMANDS));
+const AI_MODELS_SET = new Set(Object.values(AI_MODELS));
 
 export const splitMessageForTelegram = message => {
   if (message.length <= MAX_TELEGRAM_CONTENT_LENGTH) return [message];
@@ -7,3 +14,6 @@ export const splitMessageForTelegram = message => {
 
   return chunks;
 };
+
+export const isCommand = message => COMMANDS_SET.has(message);
+export const isModel = userSelection => AI_MODELS_SET.has(userSelection);
