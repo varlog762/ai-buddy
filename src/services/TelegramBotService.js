@@ -11,6 +11,7 @@ import { ensureChatExists } from './supabase.js';
 import {
   modelSelectionKeyboard,
   defaultOptionKeyboard,
+  clearChatHistoryKeyboard,
 } from '../utils/inline-keyboards.js';
 import { isCommand, isModel } from '../utils/index.js';
 
@@ -96,7 +97,7 @@ class TelegramBotService {
         this.send({
           chatId,
           message: MESSAGES_TO_USER.DELETE_CHAT_HISTORY_CONFIRMATION,
-          inlineKeyboard: defaultOptionKeyboard,
+          inlineKeyboard: clearChatHistoryKeyboard,
         }),
       [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
       [COMMANDS.SHOW_MODEL]: () => console.log('show model'),
@@ -112,6 +113,10 @@ class TelegramBotService {
 
     if (isModel(userSelection)) {
       return this.handleChangeModelSelection(chatId, userSelection);
+    }
+
+    if (userSelection === 'cancel') {
+      return this.handleCancelSelection(chatId);
     }
   }
 
