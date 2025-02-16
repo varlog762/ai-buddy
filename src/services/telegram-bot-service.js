@@ -10,6 +10,7 @@ import {
   CLEAR_CHAT_HISTORY,
   STARTING_MESSAGE,
   CHOOSE_MODEL_MESSAGE,
+  COMMANDS,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
 import {
@@ -75,15 +76,15 @@ class TelegramBotService {
     ensureChatExists(chatId);
 
     const commands = {
-      '/start': () =>
+      [COMMANDS.START]: () =>
         this.send({
           chatId,
           message: STARTING_MESSAGE,
           inlineKeyboard: modelSelectionKeyboard,
         }),
-      '/clear': () => this.emit(CLEAR_CHAT_HISTORY, chatId),
-      '/change-model': () => this.handleChangeModelCommand(chatId),
-      '/show-model': () => console.log('show model'),
+      [COMMANDS.CLEAR]: () => this.emit(CLEAR_CHAT_HISTORY, chatId),
+      [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
+      [COMMANDS.SHOW_MODEL]: () => console.log('show model'),
     };
 
     if (commands[message]) {
@@ -94,6 +95,8 @@ class TelegramBotService {
 
     this.showTypingIndicator(chatId);
   }
+
+  handleUserSelection(chatId, userSelection) {}
 
   async showTypingIndicator(chatId, timer = 700) {
     setTimeout(async () => {
