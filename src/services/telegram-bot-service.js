@@ -131,7 +131,7 @@ class TelegramBotService {
   async send({ chatId, message, inlineKeyboard = {} }) {
     try {
       await this.bot.sendMessage(chatId, message, {
-        parse_mode: 'Markdown',
+        // parse_mode: 'Markdown',
         ...inlineKeyboard,
       });
     } catch (error) {
@@ -184,7 +184,7 @@ class TelegramBotService {
     });
 
     // Emit an event indicating that a model has been selected
-    this.emit(EVENTS.LLM_SELECTED, { chatId, userSelection });
+    this.emit(EVENTS.LLM_SELECTED, { chatId, model: userSelection });
   }
 }
 

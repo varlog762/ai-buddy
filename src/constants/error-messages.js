@@ -1,5 +1,7 @@
-export const SOMETHING_WENT_WRONG =
-  'Oops! Something went wrong. Try again later.';
-export const DATABASE_SAVING_ERROR = 'Error while saving the message:';
-export const CHAT_DATA_ERROR = 'Error while getting the chat data:';
-export const FALSY_MODEL_ERROR = 'Model cannot be null or undefined';
+export const ERRORS = {
+  SOMETHING_WRONG: 'Oops! Something went wrong. Try again later.',
+  DATABASE_SAVING: 'Error while saving the message:',
+  CHAT_DATA: 'Error while getting the chat data:',
+  FALSY_MODEL: 'Model cannot be null or undefined',
+  UPDATE_MODEL: 'Error while updating the model:',
+};

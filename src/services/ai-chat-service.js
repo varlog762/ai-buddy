@@ -1,10 +1,6 @@
 import OpenAI from 'openai';
-import {
-  EVENTS,
-  CHAT_ROLES,
-  SOMETHING_WENT_WRONG,
-} from '../constants/index.js';
-import { getChatData } from './supabase.js';
+import { EVENTS, CHAT_ROLES, ERRORS } from '../constants/index.js';
+import { getChatModel, getChatHistory } from './supabase.js';
 
 class AIChatService {
   constructor(baseURL, apiKey, eventEmitter) {
@@ -14,7 +10,10 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
-      const { messages, model } = await getChatData(chatId);
+      const model = await getChatModel(chatId);
+      if (!model) throw new Error(ERRORS.FALSY_MODEL);
+
+      const messages = await getChatHistory(chatId);
 
       const completion = await this.bot.chat.completions.create({
         model,
@@ -25,7 +24,7 @@ class AIChatService {
 
       this.emit(chatId, responseMessage);
     } catch (error) {
-      this.emit(chatId, SOMETHING_WENT_WRONG);
+      this.emit(chatId, ERRORS.SOMETHING_WRONG);
       console.error(error);
     }
   }

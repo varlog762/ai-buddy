@@ -1,12 +1,6 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import {
-  SOMETHING_WENT_WRONG,
-  DATABASE_SAVING_ERROR,
-  CHAT_DATA_ERROR,
-  FALSY_MODEL_ERROR,
-  AI_MODELS,
-} from '../constants/index.js';
+import { ERRORS, AI_MODELS } from '../constants/index.js';
 
 const { SUPABASE_URL, SUPABASE_API_KEY } = process.env;
 
@@ -26,22 +20,20 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_API_KEY);
  * successfully, and rejects if there is an error.
  */
 export const saveMessageToDB = async ({ chatId, role, message }) => {
-  if (message === SOMETHING_WENT_WRONG) return;
+  if (message === ERRORS.SOMETHING_WRONG) return;
 
   const { error } = await supabase
     .from('messages')
     .insert([{ chat_id: chatId, role, content: message }]);
 
   if (error) {
-    console.error(DATABASE_SAVING_ERROR, error.message);
+    console.error(ERRORS.DATABASE_SAVING, error.message);
   }
 };
 
-// TODO: separate this to a 2 methods
-export const getChatData = async chatId => {
+export const getChatModel = async chatId => {
   if (!chatId) return null;
 
-  // Получаем текущую модель чата
   const { data: chatData, error: chatError } = await supabase
     .from('chats')
     .select('model')
@@ -49,11 +41,16 @@ export const getChatData = async chatId => {
     .single();
 
   if (chatError) {
-    console.error(`${CHAT_DATA_ERROR}: ${chatError.message}`);
+    console.error(`${ERRORS.FALSY_MODEL}: ${chatError.message}`);
     return null;
   }
 
-  // Получаем сообщения, отсортированные по времени
+  return chatData.model;
+};
+
+export const getChatHistory = async chatId => {
+  if (!chatId) return null;
+
   const { data: messages, error: messagesError } = await supabase
     .from('messages')
     .select('role, content')
@@ -61,11 +58,11 @@ export const getChatData = async chatId => {
     .order('created_at', { ascending: true });
 
   if (messagesError) {
-    console.error(`${CHAT_DATA_ERROR}: ${messagesError.message}`);
+    console.error(`${ERRORS.CHAT_DATA}: ${messagesError.message}`);
     return null;
   }
 
-  return { model: chatData.model, messages };
+  return messages;
 };
 
 export const updateLLM = async (chatId, model) => {
@@ -74,7 +71,7 @@ export const updateLLM = async (chatId, model) => {
   }
 
   if (!model) {
-    throw new Error(FALSY_MODEL_ERROR);
+    throw new Error(ERRORS.FALSY_MODEL);
   }
 
   const { error } = await supabase
@@ -82,7 +79,7 @@ export const updateLLM = async (chatId, model) => {
     .upsert({ chat_id: chatId, model }, { onConflict: ['chat_id'] });
 
   if (error) {
-    console.error('Error updating model:', error.message);
+    console.error(ERRORS.UPDATE_MODEL, error.message);
   }
 };
 
