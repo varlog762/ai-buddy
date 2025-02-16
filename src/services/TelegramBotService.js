@@ -1,8 +1,7 @@
 /* eslint-disable consistent-return */
 import TelegramBot from 'node-telegram-bot-api';
 import {
-  STARTING_MESSAGE,
-  CHOOSE_MODEL_MESSAGE,
+  MESSAGES_TO_USER,
   COMMANDS,
   EVENTS,
   CHAT_ROLES,
@@ -90,10 +89,15 @@ class TelegramBotService {
       [COMMANDS.START]: () =>
         this.send({
           chatId,
-          message: STARTING_MESSAGE,
+          message: MESSAGES_TO_USER.START,
           inlineKeyboard: defaultOptionKeyboard,
         }),
-      [COMMANDS.CLEAR]: () => this.emit(EVENTS.CLEAR_CHAT_HISTORY, chatId),
+      [COMMANDS.CLEAR_CHAT_HISTORY]: () =>
+        this.send({
+          chatId,
+          message: MESSAGES_TO_USER.DELETE_CHAT_HISTORY_CONFIRMATION,
+          inlineKeyboard: defaultOptionKeyboard,
+        }),
       [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
       [COMMANDS.SHOW_MODEL]: () => console.log('show model'),
     };
@@ -171,7 +175,7 @@ class TelegramBotService {
     if (userSelection === 'change-model') {
       this.send({
         chatId,
-        message: CHOOSE_MODEL_MESSAGE,
+        message: MESSAGES_TO_USER.CHOOSE_MODEL,
         inlineKeyboard: modelSelectionKeyboard,
       });
     }
