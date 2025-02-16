@@ -99,8 +99,13 @@ class TelegramBotService {
           message: MESSAGES_TO_USER.DELETE_CHAT_HISTORY_CONFIRMATION,
           inlineKeyboard: clearChatHistoryKeyboard,
         }),
-      [COMMANDS.CHANGE_MODEL]: () => this.handleChangeModelCommand(chatId),
-      [COMMANDS.SHOW_MODEL]: () => console.log('show model'),
+      [COMMANDS.CHANGE_MODEL]: () =>
+        this.send({
+          chatId,
+          message: MESSAGES_TO_USER.CHOOSE_MODEL,
+          inlineKeyboard: modelSelectionKeyboard,
+        }),
+      [COMMANDS.SHOW_MODEL]: () => this.emit(EVENTS.SHOW_CURRENT_LLM, chatId),
     };
 
     if (commands[message]) {
@@ -115,8 +120,8 @@ class TelegramBotService {
       return this.handleChangeModelSelection(chatId, userSelection);
     }
 
-    if (userSelection === 'cancel') {
-      return this.handleCancelSelection(chatId);
+    if (userSelection === 'clear-history') {
+      this.emit(EVENTS.CLEAR_CHAT_HISTORY, chatId);
     }
   }
 

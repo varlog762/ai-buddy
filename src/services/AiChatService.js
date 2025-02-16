@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { EVENTS, CHAT_ROLES, ERRORS } from '../constants/index.js';
-import { getChatModel, getChatHistory } from './supabase.js';
+import { getCurrentModelName, getChatHistory } from './supabase.js';
 
 class AIChatService {
   constructor(baseURL, apiKey, eventEmitter) {
@@ -10,7 +10,7 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
-      const model = await getChatModel(chatId);
+      const model = await getCurrentModelName(chatId);
       if (!model) throw new Error(ERRORS.FALSY_MODEL);
 
       const messages = await getChatHistory(chatId);

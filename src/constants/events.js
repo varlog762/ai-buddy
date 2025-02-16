@@ -5,4 +5,5 @@ export const EVENTS = {
   MESSAGE_FROM_AI: 'message-from-ai',
   CLEAR_CHAT_HISTORY: 'clear-chat-history',
   LLM_SELECTED: 'llm-selected',
+  SHOW_CURRENT_LLM: 'show-current-llm',
 };

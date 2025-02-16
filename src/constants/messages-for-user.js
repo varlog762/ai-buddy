@@ -31,4 +31,5 @@ This action will delete the chat history from our database, meaning the bot will
 However, messages in this chat will not be removed from Telegram. If you wish to clear the chat screen, you can do so manually using Telegram’s interface.  
 
 Are you sure you want to delete the chat history?`,
+  SHOW_MODEL: `*Current Model:*`,
 };

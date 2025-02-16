@@ -31,7 +31,7 @@ export const saveMessageToDB = async ({ chatId, role, message }) => {
   }
 };
 
-export const getChatModel = async chatId => {
+export const getCurrentModelName = async chatId => {
   if (!chatId) return null;
 
   const { data: chatData, error: chatError } = await supabase
@@ -68,7 +68,7 @@ export const getChatHistory = async chatId => {
 export const deleteChatHistory = async chatId => {
   if (!chatId) return;
 
-  const { data, error: messagesError } = await supabase
+  const { error: messagesError } = await supabase
     .from('messages')
     .delete()
     .eq('chat_id', chatId);
@@ -76,7 +76,6 @@ export const deleteChatHistory = async chatId => {
   if (messagesError) {
     console.error(`${ERRORS.DELETE_CHAT_HISTORY}: ${messagesError.message}`);
   } else {
-    console.log(data);
     console.log(`Successfully deleted history for chat ${chatId}`);
   }
 };

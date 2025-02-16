@@ -1,5 +1,10 @@
-import { EVENTS } from '../constants/index.js';
-import { saveMessageToDB, updateLLM, deleteChatHistory } from './supabase.js';
+import { EVENTS, MESSAGES_TO_USER } from '../constants/index.js';
+import {
+  saveMessageToDB,
+  updateLLM,
+  deleteChatHistory,
+  getCurrentModelName,
+} from './supabase.js';
 
 const eventListenerService = services => {
   const { eventEmitter, telegramBot, aiBot } = services;
@@ -37,13 +42,21 @@ const eventListenerService = services => {
   startEventListener(EVENTS.MESSAGE_FROM_AI, telegramBot);
 
   eventEmitter.on(EVENTS.CLEAR_CHAT_HISTORY, async chatId => {
-    console.log(`History cleared for chat ${chatId}`);
     deleteChatHistory(chatId);
   });
 
   eventEmitter.on(EVENTS.LLM_SELECTED, async ({ chatId, model }) => {
     console.log(`Selected ${model} for chat ${chatId}`);
     updateLLM(chatId, model);
+  });
+
+  eventEmitter.on(EVENTS.SHOW_CURRENT_LLM, async chatId => {
+    const model = await getCurrentModelName(chatId);
+
+    telegramBot.send({
+      chatId,
+      message: `${MESSAGES_TO_USER.SHOW_MODEL} ${model}`,
+    });
   });
 };
 
