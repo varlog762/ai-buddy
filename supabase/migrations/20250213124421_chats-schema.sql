@@ -3,6 +3,6 @@ drop table if exists chats;
 create table chats (
   id uuid primary key default uuid_generate_v4(),
   chat_id bigint unique not null,
-  model text not null default 'meta-llama/llama-3.1-70b-instruct:free' check (model in ('meta-llama/llama-3.1-70b-instruct:free', 'meta-llama/llama-3.1-70b-instruct:free', 'deepseek/deepseek-r1:free')),
+  model text not null default 'meta-llama/llama-3.1-70b-instruct:free' check (model in ('meta-llama/llama-3.1-70b-instruct:free', 'google/gemini-2.0-flash-lite-preview-02-05:free', 'deepseek/deepseek-r1:free')),
   lang text not null default 'en' check (lang in ('en', 'ru'))
 );

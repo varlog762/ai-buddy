@@ -1,5 +1,5 @@
 import { EVENTS } from '../constants/index.js';
-import { saveMessageToDB } from './supabase.js';
+import { saveMessageToDB, updateLLM, deleteChatHistory } from './supabase.js';
 
 const eventListenerService = services => {
   const { eventEmitter, telegramBot, aiBot } = services;
@@ -38,10 +38,12 @@ const eventListenerService = services => {
 
   eventEmitter.on(EVENTS.CLEAR_CHAT_HISTORY, async chatId => {
     console.log(`History cleared for chat ${chatId}`);
+    deleteChatHistory(chatId);
   });
 
   eventEmitter.on(EVENTS.LLM_SELECTED, async ({ chatId, model }) => {
     console.log(`Selected ${model} for chat ${chatId}`);
+    updateLLM(chatId, model);
   });
 };
 

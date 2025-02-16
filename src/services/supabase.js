@@ -65,6 +65,22 @@ export const getChatHistory = async chatId => {
   return messages;
 };
 
+export const deleteChatHistory = async chatId => {
+  if (!chatId) return;
+
+  const { data, error: messagesError } = await supabase
+    .from('messages')
+    .delete()
+    .eq('chat_id', chatId);
+
+  if (messagesError) {
+    console.error(`${ERRORS.DELETE_CHAT_HISTORY}: ${messagesError.message}`);
+  } else {
+    console.log(data);
+    console.log(`Successfully deleted history for chat ${chatId}`);
+  }
+};
+
 export const updateLLM = async (chatId, model) => {
   if (!chatId) {
     return;

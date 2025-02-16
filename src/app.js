@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { EventEmitter } from 'node:events';
 
-import TelegramBotService from './services/telegram-bot-service.js';
-import AIChatService from './services/ai-chat-service.js';
+import TelegramBotService from './services/TelegramBotService.js';
+import AIChatService from './services/AiChatService.js';
 import eventListenerService from './services/event-listener-service.js';
 
 const { TELEGRAM_API_TOKEN, AI_API_KEY, AI_API_URL } = process.env;

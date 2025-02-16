@@ -14,6 +14,7 @@ class AIChatService {
       if (!model) throw new Error(ERRORS.FALSY_MODEL);
 
       const messages = await getChatHistory(chatId);
+      if (!messages) throw new Error(ERRORS.CHAT_DATA);
 
       const completion = await this.bot.chat.completions.create({
         model,

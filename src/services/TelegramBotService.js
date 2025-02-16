@@ -1,12 +1,12 @@
 /* eslint-disable consistent-return */
 import TelegramBot from 'node-telegram-bot-api';
 import {
-  SOMETHING_WENT_WRONG,
   STARTING_MESSAGE,
   CHOOSE_MODEL_MESSAGE,
   COMMANDS,
   EVENTS,
   CHAT_ROLES,
+  ERRORS,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
 import {
@@ -135,7 +135,7 @@ class TelegramBotService {
         ...inlineKeyboard,
       });
     } catch (error) {
-      await this.bot.sendMessage(chatId, SOMETHING_WENT_WRONG);
+      await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
       console.error(error);
     }
   }
