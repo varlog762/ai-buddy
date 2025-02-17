@@ -13,7 +13,7 @@ import {
   defaultOptionKeyboard,
   clearChatHistoryKeyboard,
 } from '../utils/inline-keyboards.js';
-import { isCommand, isModel } from '../utils/index.js';
+import { isCommand, isModel, formatMarkdownMessage } from '../utils/index.js';
 
 class TelegramBotService {
   constructor(token, eventEmitter) {
@@ -144,8 +144,10 @@ class TelegramBotService {
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
     try {
+      const formattedMessage = formatMarkdownMessage(message);
+
       await this.bot.sendMessage(chatId, message, {
-        // parse_mode: 'Markdown',
+        parse_mode: 'Markdown',
         ...inlineKeyboard,
       });
     } catch (error) {
@@ -192,9 +194,10 @@ class TelegramBotService {
   }
 
   async handleChangeModelSelection(chatId, userSelection) {
+    const formattedSelection = formatMarkdownMessage(userSelection);
     await this.send({
       chatId,
-      message: `You have selected the model: ${userSelection}`,
+      message: `You have selected the model: ${formattedSelection}`,
     });
 
     // Emit an event indicating that a model has been selected

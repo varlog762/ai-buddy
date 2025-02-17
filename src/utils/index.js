@@ -15,5 +15,30 @@ export const splitMessageForTelegram = message => {
   return chunks;
 };
 
+export const formatMarkdownMessage = (message = '') => {
+  const escapeChars = [
+    '_',
+    '*',
+    '[',
+    ']',
+    '(',
+    ')',
+    '~',
+    '`',
+    '>',
+    '#',
+    '+',
+    '-',
+    '=',
+    '|',
+    '{',
+    '}',
+    '.',
+    '!',
+  ];
+
+  return message.replace(/([_*[\]()~`>#\\+=|{}.!-])/g, '\\$1');
+};
+
 export const isCommand = message => COMMANDS_SET.has(message);
 export const isModel = userSelection => AI_MODELS_SET.has(userSelection);

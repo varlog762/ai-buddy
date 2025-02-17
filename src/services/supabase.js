@@ -1,6 +1,11 @@
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
-import { ERRORS, AI_MODELS } from '../constants/index.js';
+import {
+  ERRORS,
+  AI_MODELS,
+  CHAT_ROLES,
+  SYSTEM_MESSAGE_FOR_LLM,
+} from '../constants/index.js';
 
 const { SUPABASE_URL, SUPABASE_API_KEY } = process.env;
 
@@ -114,6 +119,12 @@ export const ensureChatExists = async chatId => {
       if (insertError) {
         console.error('Ошибка создания чата:', insertError.message);
       }
+
+      saveMessageToDB({
+        chatId,
+        role: CHAT_ROLES.USER,
+        message: SYSTEM_MESSAGE_FOR_LLM,
+      });
     } else {
       console.error('Ошибка проверки чата:', error.message);
     }
