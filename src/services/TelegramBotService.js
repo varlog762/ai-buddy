@@ -15,6 +15,9 @@ import {
 } from '../utils/inline-keyboards.js';
 import { isCommand, isModel, formatMarkdownMessage } from '../utils/index.js';
 
+// TODO: delete this import
+import { TEMP_MESSAGE } from '../constants/temp.js';
+
 class TelegramBotService {
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
@@ -90,6 +93,7 @@ class TelegramBotService {
       [COMMANDS.START]: () =>
         this.send({
           chatId,
+          // message: TEMP_MESSAGE,
           message: MESSAGES_TO_USER.START,
           inlineKeyboard: defaultOptionKeyboard,
         }),
@@ -143,15 +147,22 @@ class TelegramBotService {
    * @param {string} params.message - The message to be sent.
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
-    try {
-      const formattedMessage = formatMarkdownMessage(message);
+    const formattedMessage = formatMarkdownMessage('escape', message);
 
-      await this.bot.sendMessage(chatId, message, {
-        parse_mode: 'Markdown',
+    try {
+      await this.bot.sendMessage(chatId, formattedMessage, {
+        parse_mode: 'MarkdownV2',
         ...inlineKeyboard,
       });
     } catch (error) {
-      await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
+      await this.bot.sendMessage(
+        chatId,
+        formatMarkdownMessage('remove', formattedMessage),
+        {
+          ...inlineKeyboard,
+        }
+      );
+      // await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
       console.error(error);
     }
   }
