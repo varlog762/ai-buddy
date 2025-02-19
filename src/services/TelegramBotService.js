@@ -20,6 +20,8 @@ import {
 } from '../utils/index.js';
 
 class TelegramBotService {
+  typingIndicatorInterval = null;
+
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
@@ -131,13 +133,38 @@ class TelegramBotService {
   }
 
   async showTypingIndicator(chatId, timer = 700) {
+    if (!chatId) {
+      throw new Error('chatId is required');
+    }
+
+    if (this.typingIndicatorInterval) {
+      clearInterval(this.typingIndicatorInterval);
+    }
+
+    // Выполнить сразу через 700 мс
     setTimeout(async () => {
       try {
         await this.bot.sendChatAction(chatId, 'typing');
       } catch (error) {
         console.error('Typing indicator error:', error);
       }
+
+      // Затем запускать каждую 5 сек
+      this.typingIndicatorInterval = setInterval(async () => {
+        try {
+          await this.bot.sendChatAction(chatId, 'typing');
+        } catch (error) {
+          console.error('Typing indicator error:', error);
+        }
+      }, 5000);
     }, timer);
+  }
+
+  clearTypingIndicatorInterval() {
+    if (this.typingIndicatorInterval) {
+      clearInterval(this.typingIndicatorInterval);
+      this.typingIndicatorInterval = null;
+    }
   }
 
   /**
@@ -149,6 +176,7 @@ class TelegramBotService {
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
     const formattedMessage = formatMarkdownMessageToHtml(message);
+    this.clearTypingIndicatorInterval();
 
     try {
       await this.bot.sendMessage(chatId, formattedMessage, {
