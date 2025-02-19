@@ -21,7 +21,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "dotenv": "^16.4.7",
     "markdown-it": "^14.1.0",
-    "node-telegram-bot-api": "^0.66.0",
+    "node-telegram-bot-api": "^0.63.0",
     "nodemon": "^3.1.9",
     "openai": "^4.82.0",
     "telegramify-markdown": "^1.2.2"

@@ -13,10 +13,11 @@ import {
   defaultOptionKeyboard,
   clearChatHistoryKeyboard,
 } from '../utils/inline-keyboards.js';
-import { isCommand, isModel, formatMarkdownMessage } from '../utils/index.js';
-
-// TODO: delete this import
-import { TEMP_MESSAGE } from '../constants/temp.js';
+import {
+  isCommand,
+  isModel,
+  formatMarkdownMessageToHtml,
+} from '../utils/index.js';
 
 class TelegramBotService {
   constructor(token, eventEmitter) {
@@ -147,23 +148,34 @@ class TelegramBotService {
    * @param {string} params.message - The message to be sent.
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
-    const formattedMessage = formatMarkdownMessage('escape', message);
+    const formattedMessage = formatMarkdownMessageToHtml(message);
 
     try {
       await this.bot.sendMessage(chatId, formattedMessage, {
-        parse_mode: 'MarkdownV2',
+        parse_mode: 'html',
         ...inlineKeyboard,
       });
     } catch (error) {
-      await this.bot.sendMessage(
+      await this.handleErrorSendingMessage(
+        error,
         chatId,
-        formatMarkdownMessage('remove', formattedMessage),
-        {
-          ...inlineKeyboard,
-        }
+        message,
+        inlineKeyboard
       );
-      // await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
-      console.error(error);
+    }
+  }
+
+  async handleErrorSendingMessage(error, chatId, message, inlineKeyboard = {}) {
+    if (error.message.includes("can't parse entities")) {
+      try {
+        await this.bot.sendMessage(chatId, message, {
+          ...inlineKeyboard,
+        });
+      } catch (sendError) {
+        await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
+      } finally {
+        console.error(error.message);
+      }
     }
   }
 
@@ -205,7 +217,7 @@ class TelegramBotService {
   }
 
   async handleChangeModelSelection(chatId, userSelection) {
-    const formattedSelection = formatMarkdownMessage(userSelection);
+    const formattedSelection = formatMarkdownMessageToHtml(userSelection);
     await this.send({
       chatId,
       message: `You have selected the model: ${formattedSelection}`,

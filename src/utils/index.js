@@ -1,4 +1,6 @@
-import telegramifyMarkdown from 'telegramify-markdown';
+// TODO: delete 'telegramify-markdown' or 'markdown-it' from project
+// import telegramifyMarkdown from 'telegramify-markdown';
+import markdownit from 'markdown-it';
 import {
   MAX_TELEGRAM_CONTENT_LENGTH,
   COMMANDS,
@@ -16,7 +18,9 @@ export const splitMessageForTelegram = message => {
   return chunks;
 };
 
-const escapeMarkdownV2 = text =>
+const deleteBrTags = message => message.replace(/<br>/g, '');
+
+export const escapeMarkdownV2 = text =>
   text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
 
 /**
@@ -31,8 +35,15 @@ const escapeMarkdownV2 = text =>
  * @param {string} [message=''] - The Markdown message to format.
  * @returns {string} The formatted message.
  */
-export const formatMarkdownMessage = (formatOption, message = '') =>
-  telegramifyMarkdown(message, formatOption);
+export const formatMarkdownMessageToHtml = (message = '') => {
+  const md = markdownit({
+    html: false,
+    breaks: true,
+  });
+  const formattedMessage = md.renderInline(message);
+  return deleteBrTags(formattedMessage);
+};
+// telegramifyMarkdown(message, formatOption);
 
 export const isCommand = message => COMMANDS_SET.has(message);
 export const isModel = userSelection => AI_MODELS_SET.has(userSelection);

@@ -23,7 +23,7 @@ export const clearChatHistoryKeyboard = {
   reply_markup: {
     inline_keyboard: [
       [{ text: '✅ Clear History', callback_data: 'clear-history' }],
-      [{ text: '❌ Change Model', callback_data: 'cancel' }],
+      [{ text: '❌ Cancel', callback_data: 'cancel' }],
     ],
   },
 };

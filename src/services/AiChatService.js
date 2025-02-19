@@ -22,6 +22,10 @@ class AIChatService {
       });
 
       const responseMessage = completion?.choices[0]?.message?.content;
+      if (!responseMessage) {
+        console.log(completion);
+        return;
+      }
 
       this.emit(chatId, responseMessage);
     } catch (error) {
