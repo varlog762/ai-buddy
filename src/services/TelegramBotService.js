@@ -136,6 +136,8 @@ class TelegramBotService {
    * @param {number} [timer=700] - time in milliseconds to start the typing indicator
    */
   async startTypingIndicator(chatId, timer = 700) {
+    const action = 'typing';
+
     if (!chatId) {
       throw new Error('chatId is required');
     }
@@ -147,23 +149,28 @@ class TelegramBotService {
 
     // Wait for the specified time before starting the typing indicator
     setTimeout(async () => {
-      try {
-        // Send the typing indicator to the chat
-        await this.bot.sendChatAction(chatId, 'typing');
-      } catch (error) {
-        console.error('Typing indicator error:', error);
-      }
-
+      await this.sendChatAction(chatId, action);
       // Start the typing indicator and keep sending every 5 seconds
       this.typingIndicatorTimer = setInterval(async () => {
-        try {
-          // Send the typing indicator to the chat
-          await this.bot.sendChatAction(chatId, 'typing');
-        } catch (error) {
-          console.error('Typing indicator error:', error);
-        }
-      }, 5500);
+        await this.sendChatAction(chatId, action);
+      }, 6000);
     }, timer);
+  }
+
+  /**
+   * Sends a chat action (e.g., typing indicator) to a specific chat ID.
+   *
+   * @param {string} chatId - The ID of the chat where the action will be sent.
+   * @param {string} action - The action to be performed (e.g., 'typing').
+   */
+  async sendChatAction(chatId, action) {
+    try {
+      // Attempt to send the specified chat action to the given chat ID
+      await this.bot.sendChatAction(chatId, action);
+    } catch (error) {
+      // Log an error message if the chat action fails
+      console.error('Typing indicator error:', error);
+    }
   }
 
   /**

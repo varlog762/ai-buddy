@@ -10,7 +10,8 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
-      const model = await getCurrentModelName(chatId);
+      const model = 'wedfwe';
+      // const model = await getCurrentModelName(chatId);
       if (!model) throw new Error(ERRORS.FALSY_MODEL);
 
       const messages = await getChatHistory(chatId);
@@ -21,13 +22,13 @@ class AIChatService {
         messages,
       });
 
-      const responseMessage = completion?.choices[0]?.message?.content;
-      if (!responseMessage) throw new Error(completion);
+      const responseMessage = completion?.choices[10]?.message?.content;
+      if (!responseMessage) console.log(completion?.error);
 
       this.emit(chatId, responseMessage);
     } catch (error) {
       this.emit(chatId, ERRORS.SOMETHING_WRONG);
-      console.error(error);
+      console.error(error.error);
     }
   }
 
