@@ -1,29 +1,29 @@
 import { AI_MODELS } from '../constants/index.js';
 
-export const modelSelectionKeyboard = {
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: 'Llama 3.1 70b', callback_data: AI_MODELS.LLAMA }],
-      [{ text: 'Gemini 2.0', callback_data: AI_MODELS.GEMINI }],
-      [{ text: 'DeepSeek R1', callback_data: AI_MODELS.DEEPSEEK }],
-    ],
+export const inlineKeyboards = {
+  modelSelection: {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: 'Llama 3.1 70b', callback_data: AI_MODELS.LLAMA }],
+        [{ text: 'Gemini 2.0', callback_data: AI_MODELS.GEMINI }],
+        [{ text: 'DeepSeek R1', callback_data: AI_MODELS.DEEPSEEK }],
+      ],
+    },
   },
-};
-
-export const defaultOptionKeyboard = {
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: '🔄 Change Model', callback_data: 'change-model' }],
-      [{ text: '✅ Keep Default', callback_data: 'keep-default' }],
-    ],
+  defaultOption: {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '🔄 Change Model', callback_data: 'change-model' }],
+        [{ text: '✅ Keep Default', callback_data: 'keep-default' }],
+      ],
+    },
   },
-};
-
-export const clearChatHistoryKeyboard = {
-  reply_markup: {
-    inline_keyboard: [
-      [{ text: '✅ Clear History', callback_data: 'clear-history' }],
-      [{ text: '❌ Cancel', callback_data: 'cancel' }],
-    ],
+  clearChatHistory: {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '✅ Clear History', callback_data: 'clear-history' }],
+        [{ text: '❌ Cancel', callback_data: 'cancel' }],
+      ],
+    },
   },
 };

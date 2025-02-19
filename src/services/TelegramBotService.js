@@ -8,11 +8,7 @@ import {
   ERRORS,
 } from '../constants/index.js';
 import { ensureChatExists } from './supabase.js';
-import {
-  modelSelectionKeyboard,
-  defaultOptionKeyboard,
-  clearChatHistoryKeyboard,
-} from '../utils/inline-keyboards.js';
+import { inlineKeyboards } from '../utils/inline-keyboards.js';
 import {
   isCommand,
   isModel,
@@ -98,19 +94,19 @@ class TelegramBotService {
           chatId,
           // message: TEMP_MESSAGE,
           message: MESSAGES_TO_USER.START,
-          inlineKeyboard: defaultOptionKeyboard,
+          inlineKeyboard: inlineKeyboards.defaultOption,
         }),
       [COMMANDS.CLEAR_CHAT_HISTORY]: () =>
         this.send({
           chatId,
           message: MESSAGES_TO_USER.DELETE_CHAT_HISTORY_CONFIRMATION,
-          inlineKeyboard: clearChatHistoryKeyboard,
+          inlineKeyboard: inlineKeyboards.clearChatHistory,
         }),
       [COMMANDS.CHANGE_MODEL]: () =>
         this.send({
           chatId,
           message: MESSAGES_TO_USER.CHOOSE_MODEL,
-          inlineKeyboard: modelSelectionKeyboard,
+          inlineKeyboard: inlineKeyboards.modelSelection,
         }),
       [COMMANDS.SHOW_MODEL]: () => this.emit(EVENTS.SHOW_CURRENT_LLM, chatId),
     };
@@ -166,7 +162,7 @@ class TelegramBotService {
         } catch (error) {
           console.error('Typing indicator error:', error);
         }
-      }, 5000);
+      }, 5500);
     }, timer);
   }
 
@@ -256,7 +252,7 @@ class TelegramBotService {
       this.send({
         chatId,
         message: MESSAGES_TO_USER.CHOOSE_MODEL,
-        inlineKeyboard: modelSelectionKeyboard,
+        inlineKeyboard: inlineKeyboards.modelSelection,
       });
     }
   }
