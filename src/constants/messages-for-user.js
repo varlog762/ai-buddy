@@ -16,7 +16,7 @@ This is an advanced AI-powered chat bot for Telegram, designed for intelligent a
 
 ✅ Chat history management  
 
-*By default, Meta Llama 3.1 is selected.* However, you can switch models now or later using the \`/change-model\` command.  
+*By default, Meta Llama 3.1 is selected.* However, you can switch models now or later using the \`/changemodel\` command.  
 
 ⚠️ *If a model is temporarily unavailable due to high demand (you may receive errors), consider switching to another or waiting for access to be restored.*  
 

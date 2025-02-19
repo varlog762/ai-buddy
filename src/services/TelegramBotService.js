@@ -20,7 +20,7 @@ import {
 } from '../utils/index.js';
 
 class TelegramBotService {
-  typingIndicatorInterval = null;
+  typingIndicatorTimer = null;
 
   constructor(token, eventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
@@ -88,7 +88,7 @@ class TelegramBotService {
       message,
       role: CHAT_ROLES.USER,
     });
-    this.showTypingIndicator(chatId);
+    this.startTypingIndicator(chatId);
   }
 
   handleCommands(chatId, message) {
@@ -132,26 +132,36 @@ class TelegramBotService {
     }
   }
 
-  async showTypingIndicator(chatId, timer = 700) {
+  /**
+   * Sends a typing indicator to a specific chat ID.
+   * If the `timer` option is specified, it will start the typing indicator after the specified time.
+   * The typing indicator will keep sending every 5 seconds until the `stopTypingIndicator` method is called.
+   * @param {string} chatId
+   * @param {number} [timer=700] - time in milliseconds to start the typing indicator
+   */
+  async startTypingIndicator(chatId, timer = 700) {
     if (!chatId) {
       throw new Error('chatId is required');
     }
 
-    if (this.typingIndicatorInterval) {
-      clearInterval(this.typingIndicatorInterval);
+    // If the typing indicator is already running, stop it
+    if (this.typingIndicatorTimer) {
+      clearInterval(this.typingIndicatorTimer);
     }
 
-    // Выполнить сразу через 700 мс
+    // Wait for the specified time before starting the typing indicator
     setTimeout(async () => {
       try {
+        // Send the typing indicator to the chat
         await this.bot.sendChatAction(chatId, 'typing');
       } catch (error) {
         console.error('Typing indicator error:', error);
       }
 
-      // Затем запускать каждую 5 сек
-      this.typingIndicatorInterval = setInterval(async () => {
+      // Start the typing indicator and keep sending every 5 seconds
+      this.typingIndicatorTimer = setInterval(async () => {
         try {
+          // Send the typing indicator to the chat
           await this.bot.sendChatAction(chatId, 'typing');
         } catch (error) {
           console.error('Typing indicator error:', error);
@@ -160,10 +170,17 @@ class TelegramBotService {
     }, timer);
   }
 
-  clearTypingIndicatorInterval() {
-    if (this.typingIndicatorInterval) {
-      clearInterval(this.typingIndicatorInterval);
-      this.typingIndicatorInterval = null;
+  /**
+   * Stops the typing indicator from running.
+   * If the typing indicator is running, calling this method will stop it.
+   */
+  stopTypingIndicator() {
+    if (this.typingIndicatorTimer) {
+      // Clear the timer for the typing indicator
+      clearInterval(this.typingIndicatorTimer);
+
+      // Reset the timer to null
+      this.typingIndicatorTimer = null;
     }
   }
 
@@ -176,7 +193,7 @@ class TelegramBotService {
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
     const formattedMessage = formatMarkdownMessageToHtml(message);
-    this.clearTypingIndicatorInterval();
+    this.stopTypingIndicator();
 
     try {
       await this.bot.sendMessage(chatId, formattedMessage, {
