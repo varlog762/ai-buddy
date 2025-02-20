@@ -53,6 +53,23 @@ export const getCurrentModelName = async chatId => {
   return chatData.model;
 };
 
+export const getCurrentSystemMessage = async chatId => {
+  if (!chatId) return null;
+
+  const { data: chatData, error: chatError } = await supabase
+    .from('chats')
+    .select('system_message')
+    .eq('chat_id', chatId)
+    .single();
+
+  if (chatError) {
+    console.error(`${ERRORS.FALSY_SYSTEM_MESSAGE}: ${chatError.message}`);
+    return null;
+  }
+
+  return chatData.system_message;
+};
+
 export const getChatHistory = async chatId => {
   if (!chatId) return null;
 
@@ -112,9 +129,14 @@ export const ensureChatExists = async chatId => {
 
   if (error) {
     if (error.code === 'PGRST116') {
-      const { error: insertError } = await supabase
-        .from('chats')
-        .insert({ chat_id: chatId, model: AI_MODELS.LLAMA });
+      const { error: insertError } = await supabase.from('chats').insert({
+        chat_id: chatId,
+        model: AI_MODELS.LLAMA,
+        system_message: {
+          role: CHAT_ROLES.SYSTEM,
+          content: SYSTEM_MESSAGE_FOR_LLM,
+        },
+      });
 
       if (insertError) {
         console.error('Ошибка создания чата:', insertError.message);
