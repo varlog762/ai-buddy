@@ -92,7 +92,6 @@ class TelegramBotService {
       [COMMANDS.START]: () =>
         this.send({
           chatId,
-          // message: TEMP_MESSAGE,
           message: MESSAGES_TO_USER.START,
           inlineKeyboard: inlineKeyboards.defaultOption,
         }),
@@ -129,65 +128,6 @@ class TelegramBotService {
   }
 
   /**
-   * Sends a typing indicator to a specific chat ID.
-   * If the `timer` option is specified, it will start the typing indicator after the specified time.
-   * The typing indicator will keep sending every 5 seconds until the `stopTypingIndicator` method is called.
-   * @param {string} chatId
-   * @param {number} [timer=700] - time in milliseconds to start the typing indicator
-   */
-  async startTypingIndicator(chatId, timer = 700) {
-    const action = 'typing';
-
-    if (!chatId) {
-      throw new Error('chatId is required');
-    }
-
-    // If the typing indicator is already running, stop it
-    if (this.typingIndicatorTimer) {
-      clearInterval(this.typingIndicatorTimer);
-    }
-
-    // Wait for the specified time before starting the typing indicator
-    setTimeout(async () => {
-      await this.sendChatAction(chatId, action);
-      // Start the typing indicator and keep sending every 5 seconds
-      this.typingIndicatorTimer = setInterval(async () => {
-        await this.sendChatAction(chatId, action);
-      }, 6000);
-    }, timer);
-  }
-
-  /**
-   * Sends a chat action (e.g., typing indicator) to a specific chat ID.
-   *
-   * @param {string} chatId - The ID of the chat where the action will be sent.
-   * @param {string} action - The action to be performed (e.g., 'typing').
-   */
-  async sendChatAction(chatId, action) {
-    try {
-      // Attempt to send the specified chat action to the given chat ID
-      await this.bot.sendChatAction(chatId, action);
-    } catch (error) {
-      // Log an error message if the chat action fails
-      console.error('Typing indicator error:', error);
-    }
-  }
-
-  /**
-   * Stops the typing indicator from running.
-   * If the typing indicator is running, calling this method will stop it.
-   */
-  stopTypingIndicator() {
-    if (this.typingIndicatorTimer) {
-      // Clear the timer for the typing indicator
-      clearInterval(this.typingIndicatorTimer);
-
-      // Reset the timer to null
-      this.typingIndicatorTimer = null;
-    }
-  }
-
-  /**
    * Sends a message to a specific chat ID.
    *
    * @param {Object} params - The parameters for sending a message.
@@ -195,10 +135,10 @@ class TelegramBotService {
    * @param {string} params.message - The message to be sent.
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
-    const formattedMessage = formatMarkdownMessageToHtml(message);
     this.stopTypingIndicator();
 
     try {
+      const formattedMessage = formatMarkdownMessageToHtml(message);
       await this.bot.sendMessage(chatId, formattedMessage, {
         parse_mode: 'html',
         ...inlineKeyboard,
@@ -213,6 +153,7 @@ class TelegramBotService {
     }
   }
 
+  // TODO: refactor handleErrorSendingMessage
   async handleErrorSendingMessage(error, chatId, message, inlineKeyboard = {}) {
     if (error.message.includes("can't parse entities")) {
       try {
@@ -251,6 +192,67 @@ class TelegramBotService {
     } catch (error) {
       // Log the error if the message deletion fails
       console.error('Failed to delete message:', error.message);
+    }
+  }
+
+  /**
+   * Sends a typing indicator to a specific chat ID.
+   * If the `timer` option is specified, it will start the typing indicator after the specified time.
+   * The typing indicator will keep sending every 5 seconds until the `stopTypingIndicator` method is called.
+   * @param {string} chatId
+   * @param {number} [timer=700] - time in milliseconds to start the typing indicator
+   */
+  async startTypingIndicator(chatId, timer = 700) {
+    const action = 'typing';
+
+    if (!chatId) {
+      return console.error('startTypingIndicator: chatId is required');
+    }
+
+    // If the typing indicator is already running, stop it
+    if (this.typingIndicatorTimer) {
+      clearInterval(this.typingIndicatorTimer);
+    }
+
+    // Wait for the specified time before starting the typing indicator
+    setTimeout(async () => {
+      await this.sendChatAction(chatId, action);
+      // Start the typing indicator and keep sending every 5 seconds
+      this.typingIndicatorTimer = setInterval(async () => {
+        await this.sendChatAction(chatId, action);
+      }, 7000);
+    }, timer);
+  }
+
+  /**
+   * Sends a chat action (e.g., typing indicator) to a specific chat ID.
+   *
+   * @param {string} chatId - The ID of the chat where the action will be sent.
+   * @param {string} action - The action to be performed (e.g., 'typing').
+   */
+  async sendChatAction(chatId, action) {
+    // TODO: delete console log
+    console.log(new Date().toISOString());
+    try {
+      // Attempt to send the specified chat action to the given chat ID
+      await this.bot.sendChatAction(chatId, action);
+    } catch (error) {
+      // Log an error message if the chat action fails
+      console.error('Typing indicator error:', error);
+    }
+  }
+
+  /**
+   * Stops the typing indicator from running.
+   * If the typing indicator is running, calling this method will stop it.
+   */
+  stopTypingIndicator() {
+    if (this.typingIndicatorTimer) {
+      // Clear the timer for the typing indicator
+      clearInterval(this.typingIndicatorTimer);
+
+      // Reset the timer to null
+      this.typingIndicatorTimer = null;
     }
   }
 

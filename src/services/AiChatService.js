@@ -10,25 +10,28 @@ class AIChatService {
 
   async send({ chatId }) {
     try {
-      const model = 'wedfwe';
-      // const model = await getCurrentModelName(chatId);
+      const model = await getCurrentModelName(chatId);
       if (!model) throw new Error(ERRORS.FALSY_MODEL);
 
       const messages = await getChatHistory(chatId);
       if (!messages) throw new Error(ERRORS.CHAT_DATA);
 
-      const completion = await this.bot.chat.completions.create({
+      const { error, choices } = await this.bot.chat.completions.create({
         model,
         messages,
       });
 
-      const responseMessage = completion?.choices[10]?.message?.content;
-      if (!responseMessage) console.log(completion?.error);
+      if (error) {
+        console.log(error);
+        throw new Error(`${error.message}: code ${error.code}`);
+      }
+      const responseMessage = choices[0]?.message?.content;
+      if (responseMessage) this.emit(chatId, responseMessage);
 
-      this.emit(chatId, responseMessage);
+      // if (!responseMessage) console.log(completion?.error);
     } catch (error) {
       this.emit(chatId, ERRORS.SOMETHING_WRONG);
-      console.error(error.error);
+      console.error(error);
     }
   }
 
