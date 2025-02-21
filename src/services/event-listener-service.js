@@ -5,6 +5,10 @@ import {
   deleteChatHistory,
   getCurrentModelName,
 } from './supabase.js';
+import { handleLongText } from '../utils/index.js';
+
+// TODO: remove import
+import { LONG_TEXT } from '../constants/long-text.js';
 
 const eventListenerService = services => {
   const { eventEmitter, telegramBot, aiBot } = services;
@@ -57,6 +61,12 @@ const eventListenerService = services => {
       chatId,
       message: `${MESSAGES_TO_USER.SHOW_MODEL} ${model}`,
     });
+  });
+
+  // TODO: remove this
+  eventEmitter.on('print-long', async chatId => {
+    handleLongText(LONG_TEXT);
+    telegramBot.sendLongMessage(chatId, LONG_TEXT);
   });
 };
 

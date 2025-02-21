@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import {
   ERRORS,
-  AI_MODELS,
   CHAT_ROLES,
   SYSTEM_MESSAGE_FOR_LLM,
 } from '../constants/index.js';
@@ -46,7 +45,7 @@ export const getCurrentModelName = async chatId => {
     .single();
 
   if (chatError) {
-    console.error(`${ERRORS.FALSY_MODEL}: ${chatError.message}`);
+    console.error(`${ERRORS.GET_LLM_NAME}: ${chatError.message}`);
     return null;
   }
 
@@ -63,7 +62,7 @@ export const getCurrentSystemMessage = async chatId => {
     .single();
 
   if (chatError) {
-    console.error(`${ERRORS.FALSY_SYSTEM_MESSAGE}: ${chatError.message}`);
+    console.error(`${ERRORS.GET_SYSTEM_MESSAGE}: ${chatError.message}`);
     return null;
   }
 
@@ -108,7 +107,7 @@ export const updateLLM = async (chatId, model) => {
   }
 
   if (!model) {
-    throw new Error(ERRORS.FALSY_MODEL);
+    throw new Error(ERRORS.FALSY_LLM_NAME);
   }
 
   const { error } = await supabase
@@ -131,7 +130,7 @@ export const ensureChatExists = async chatId => {
     if (error.code === 'PGRST116') {
       const { error: insertError } = await supabase.from('chats').insert({
         chat_id: chatId,
-        model: AI_MODELS.LLAMA,
+
         system_message: {
           role: CHAT_ROLES.SYSTEM,
           content: SYSTEM_MESSAGE_FOR_LLM,
@@ -141,12 +140,6 @@ export const ensureChatExists = async chatId => {
       if (insertError) {
         console.error('Ошибка создания чата:', insertError.message);
       }
-
-      saveMessageToDB({
-        chatId,
-        role: CHAT_ROLES.USER,
-        message: SYSTEM_MESSAGE_FOR_LLM,
-      });
     } else {
       console.error('Ошибка проверки чата:', error.message);
     }
