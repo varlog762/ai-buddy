@@ -48,42 +48,68 @@ export const formatMarkdownMessageToHtml = (message = '') => {
 export const isCommand = message => COMMANDS_SET.has(message);
 export const isModel = userSelection => AI_MODELS_SET.has(userSelection);
 
-const isTextTooLong = (text, maxTextLength = MAX_TELEGRAM_CONTENT_LENGTH) =>
-  text.length > maxTextLength;
+/**
+ * Checks if a given text exceeds the maximum allowed length for a Telegram message.
+ *
+ * @param {string} text - The text to check.
+ * @param {number} [maxLength=MAX_TELEGRAM_CONTENT_LENGTH] - The maximum allowed length.
+ * @returns {boolean} If the text exceeds the maximum allowed length.
+ */
+const isTextExceedingLimit = (text, maxLength = MAX_TELEGRAM_CONTENT_LENGTH) =>
+  text.length > maxLength;
+
+/**
+ * Finds the last index of a substring in a given string.
+ *
+ * @param {string} needle - The substring to search for.
+ * @param {string} haystack - The string to search in.
+ * @returns {number} The last index of the substring in the string or null if not found.
+ */
+const findLastIndexOf = (needle, haystack) => {
+  // Check for invalid inputs
+  if (
+    typeof needle !== 'string' ||
+    typeof haystack !== 'string' ||
+    needle === ''
+  ) {
+    return null;
+  }
+
+  // Find the last index of the substring
+  const lastIndex = haystack.lastIndexOf(needle);
+
+  // Return null if the substring was not found
+  return lastIndex === -1 ? null : lastIndex;
+};
 
 export const handleLongText = (
   text,
-  maxTextLength = MAX_TELEGRAM_CONTENT_LENGTH
-  // eslint-disable-next-line consistent-return
+  maxLength = MAX_TELEGRAM_CONTENT_LENGTH
 ) => {
-  if (!text) return '';
-  if (!isTextTooLong(text, maxTextLength)) return text;
+  if (!text) return [];
 
-  let localText = text;
-  const normalLengthTextArray = [];
+  if (!isTextExceedingLimit(text, maxLength)) return [text];
 
-  // eslint-disable-next-line no-unreachable-loop
-  while (localText.length > maxTextLength) {
-    const chunk = localText.slice(0, maxTextLength);
-    const lastNewlineIndex = chunk.lastIndexOf('\n');
+  let remainingText = text;
+  const chunks = [];
 
-    console.log(lastNewlineIndex);
+  while (remainingText.length > maxLength) {
+    const currentChunk = remainingText.slice(0, maxLength);
+    const splitIndex =
+      findLastIndexOf('\n', currentChunk) ||
+      findLastIndexOf('.', currentChunk) ||
+      maxLength;
 
-    if (lastNewlineIndex === -1) {
-      console.log('There is not newline symbol in the text');
-    }
+    const chunk = remainingText.slice(0, splitIndex);
+    chunks.push(chunk);
 
-    const normalLengthText = localText.slice(0, lastNewlineIndex);
-    normalLengthTextArray.push(normalLengthText);
+    remainingText = remainingText.slice(splitIndex);
 
-    const slicedText = localText.slice(lastNewlineIndex);
-    if (!isTextTooLong(slicedText)) {
-      normalLengthTextArray.push(slicedText);
+    if (!isTextExceedingLimit(remainingText, maxLength)) {
+      chunks.push(remainingText);
       break;
     }
-
-    localText = slicedText;
   }
 
-  return normalLengthTextArray;
+  return chunks;
 };
