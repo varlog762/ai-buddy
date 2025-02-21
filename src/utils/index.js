@@ -82,6 +82,13 @@ const findLastIndexOf = (needle, haystack) => {
   return lastIndex === -1 ? null : lastIndex;
 };
 
+/**
+ * Splits a given text into chunks of a maximum length allowed by Telegram.
+ *
+ * @param {string} text - The text to split.
+ * @param {number} [maxLength=MAX_TELEGRAM_CONTENT_LENGTH] - The maximum allowed length.
+ * @returns {string[]} An array of strings, each with a maximum length of maxLength.
+ */
 export const handleLongText = (
   text,
   maxLength = MAX_TELEGRAM_CONTENT_LENGTH
@@ -93,6 +100,11 @@ export const handleLongText = (
   let remainingText = text;
   const chunks = [];
 
+  /**
+   * Split the text into chunks of maximum length maxLength.
+   * Try to split at the last occurrence of a newline or a period.
+   * If no newline or period is found, split at maxLength.
+   */
   while (remainingText.length > maxLength) {
     const currentChunk = remainingText.slice(0, maxLength);
     const splitIndex =

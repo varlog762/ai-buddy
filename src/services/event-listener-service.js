@@ -65,8 +65,14 @@ const eventListenerService = services => {
 
   // TODO: remove this
   eventEmitter.on('print-long', async chatId => {
-    handleLongText(LONG_TEXT);
-    telegramBot.sendLongMessage(chatId, LONG_TEXT);
+    // eslint-disable-next-line no-unused-vars
+    const chunks = handleLongText(LONG_TEXT);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const chunk of chunks) {
+      // eslint-disable-next-line no-await-in-loop
+      await telegramBot.sendLongMessage(chatId, chunk);
+    }
   });
 };
 
