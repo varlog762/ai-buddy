@@ -7,43 +7,63 @@ import {
 } from './supabase.js';
 import { handleLongText } from '../utils/index.js';
 
-// TODO: remove import
-import { LONG_TEXT } from '../constants/long-text.js';
+const handleTelegramMessage = async (aiBot, eventData) => {
+  const { chatId, message, role } = eventData || {};
 
-const eventListenerService = services => {
+  if (!chatId || !message || !role) {
+    console.error(
+      `Invalid event data for ${EVENTS.MESSAGE_FROM_TG}:`,
+      eventData
+    );
+    return;
+  }
+
+  try {
+    await saveMessageToDB({ chatId, message, role });
+    await aiBot.send({ chatId, message });
+  } catch (error) {
+    console.error(`Error handling event ${EVENTS.MESSAGE_FROM_TG}:`, error);
+  }
+};
+
+const handleAIMessage = async (telegramBot, eventData) => {
+  const { chatId, message, role } = eventData || {};
+
+  if (!chatId || !message || !role) {
+    console.error(
+      `Invalid event data for ${EVENTS.MESSAGE_FROM_AI}:`,
+      eventData
+    );
+    return;
+  }
+
+  try {
+    await saveMessageToDB({ chatId, message, role });
+
+    const messageChunks = handleLongText(message);
+
+    for (const chunk of messageChunks) {
+      await telegramBot.send({ chatId, message: chunk });
+    }
+
+    await telegramBot.send({ chatId, message });
+  } catch (error) {
+    console.error(`Error handling event ${EVENTS.MESSAGE_FROM_AI}:`, error);
+  }
+};
+
+export const startEventListeners = services => {
   const { eventEmitter, telegramBot, aiBot } = services;
 
   telegramBot.startListeners();
 
-  /**
-   * Listens for a specific event and sends the message to the given bot.
-   *
-   * @param {string} eventName - The name of the event to listen for.
-   * @param {Object} messageSender - The bot instance to send the message to.
-   */
-  const startEventListener = (eventName, messageSender) => {
-    eventEmitter.on(eventName, async ({ chatId, message, role }) => {
-      if (!chatId || !message || !role) {
-        console.error('Invalid event data:', {
-          chatId,
-          message,
-          role,
-        });
+  eventEmitter.on(EVENTS.MESSAGE_FROM_TG, eventData =>
+    handleTelegramMessage(aiBot, eventData)
+  );
 
-        return;
-      }
-
-      try {
-        await saveMessageToDB({ chatId, message, role });
-        messageSender.send({ chatId, message });
-      } catch (error) {
-        console.error(error);
-      }
-    });
-  };
-
-  startEventListener(EVENTS.MESSAGE_FROM_TG, aiBot);
-  startEventListener(EVENTS.MESSAGE_FROM_AI, telegramBot);
+  eventEmitter.on(EVENTS.MESSAGE_FROM_AI, eventData =>
+    handleAIMessage(telegramBot, eventData)
+  );
 
   eventEmitter.on(EVENTS.CLEAR_CHAT_HISTORY, async chatId => {
     deleteChatHistory(chatId);
@@ -62,18 +82,4 @@ const eventListenerService = services => {
       message: `${MESSAGES_TO_USER.SHOW_MODEL} ${model}`,
     });
   });
-
-  // TODO: remove this
-  eventEmitter.on('print-long', async chatId => {
-    // eslint-disable-next-line no-unused-vars
-    const chunks = handleLongText(LONG_TEXT);
-
-    // eslint-disable-next-line no-restricted-syntax
-    for (const chunk of chunks) {
-      // eslint-disable-next-line no-await-in-loop
-      await telegramBot.sendLongMessage(chatId, chunk);
-    }
-  });
 };
-
-export default eventListenerService;

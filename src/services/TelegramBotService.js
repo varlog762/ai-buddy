@@ -50,11 +50,6 @@ class TelegramBotService {
         return this.handleCommands(chatId, message);
       }
 
-      // TODO: remove this
-      if (message === '/long') {
-        return this.emit('print-long', chatId);
-      }
-
       this.handleMessages(chatId, message);
     });
   }
@@ -236,8 +231,6 @@ class TelegramBotService {
    * @param {string} action - The action to be performed (e.g., 'typing').
    */
   async sendChatAction(chatId, action) {
-    // TODO: delete console log
-    console.log(new Date().toISOString());
     try {
       // Attempt to send the specified chat action to the given chat ID
       await this.bot.sendChatAction(chatId, action);
@@ -280,15 +273,6 @@ class TelegramBotService {
 
     // Emit an event indicating that a model has been selected
     this.emit(EVENTS.LLM_SELECTED, { chatId, model: userSelection });
-  }
-
-  // TODO: delete this method
-  async sendLongMessage(chatId, message) {
-    try {
-      await this.bot.sendMessage(chatId, message);
-    } catch (error) {
-      console.error(error.message);
-    }
   }
 }
 

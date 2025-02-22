@@ -79,7 +79,7 @@ const findLastIndexOf = (needle, haystack) => {
   const lastIndex = haystack.lastIndexOf(needle);
 
   // Return null if the substring was not found
-  return lastIndex === -1 ? null : lastIndex;
+  return lastIndex === -1 ? null : lastIndex + 1;
 };
 
 /**
@@ -110,6 +110,7 @@ export const handleLongText = (
     const splitIndex =
       findLastIndexOf('\n', currentChunk) ||
       findLastIndexOf('.', currentChunk) ||
+      findLastIndexOf(' ', currentChunk) ||
       maxLength;
 
     const chunk = remainingText.slice(0, splitIndex);
