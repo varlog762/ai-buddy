@@ -5,7 +5,7 @@ import {
   deleteChatHistory,
   getCurrentModelName,
 } from './supabase.js';
-import { handleLongText } from '../utils/index.js';
+import { handleLongText, getVoiceMessage } from '../utils/index.js';
 
 const handleTelegramTextMessage = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
@@ -58,6 +58,25 @@ export const startEventListeners = services => {
   eventEmitter.on(EVENTS.MESSAGE_FROM_TG, eventData =>
     handleTelegramTextMessage(aiBot, eventData)
   );
+
+  eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
+    const { chatId, payload: voiceMessageFileId, role } = eventData || {};
+
+    if (!chatId || !voiceMessageFileId || !role) {
+      console.error(
+        `Invalid event data for ${EVENTS.VOICE_MESSAGE_FROM_TG}:`,
+        eventData
+      );
+      return;
+    }
+
+    try {
+      const voiceMessage = await getVoiceMessage(voiceMessageFileId);
+      console.log(voiceMessage);
+    } catch (error) {
+      console.error(error);
+    }
+  });
 
   eventEmitter.on(EVENTS.MESSAGE_FROM_AI, eventData =>
     handleAIMessage(telegramBot, eventData)

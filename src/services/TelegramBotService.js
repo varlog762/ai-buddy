@@ -49,7 +49,7 @@ class TelegramBotService {
     const voiceMessageFileId = msg.voice?.file_id;
 
     ensureChatExists(chatId);
-    console.log(message, voiceMessageFileId);
+
     if (voiceMessageFileId) {
       return this.handleMessage(
         chatId,
@@ -60,7 +60,7 @@ class TelegramBotService {
 
     if (message) {
       return isCommand(message)
-        ? this.handleTextCommands(chatId, message)
+        ? this.handleCommands(chatId, message)
         : this.handleMessage(chatId, message);
     }
   }
@@ -98,7 +98,7 @@ class TelegramBotService {
     this.startTypingIndicator(chatId);
   }
 
-  handleTextCommands(chatId, message) {
+  handleCommands(chatId, message) {
     const commands = {
       [COMMANDS.START]: () =>
         this.send({
