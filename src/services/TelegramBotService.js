@@ -41,8 +41,10 @@ class TelegramBotService {
    */
   startListenMessages() {
     this.bot.on(EVENTS.MESSAGE, msg => {
+      // console.log(msg);
       const chatId = msg.chat.id;
       const message = msg.text;
+      console.log(message);
 
       ensureChatExists(chatId);
 
