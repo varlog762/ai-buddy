@@ -7,8 +7,8 @@ import {
 } from './supabase.js';
 import { handleLongText } from '../utils/index.js';
 
-const handleTelegramMessage = async (aiBot, eventData) => {
-  const { chatId, message, role } = eventData || {};
+const handleTelegramTextMessage = async (aiBot, eventData) => {
+  const { chatId, payload: message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
     console.error(
@@ -56,7 +56,7 @@ export const startEventListeners = services => {
   telegramBot.startListeners();
 
   eventEmitter.on(EVENTS.MESSAGE_FROM_TG, eventData =>
-    handleTelegramMessage(aiBot, eventData)
+    handleTelegramTextMessage(aiBot, eventData)
   );
 
   eventEmitter.on(EVENTS.MESSAGE_FROM_AI, eventData =>

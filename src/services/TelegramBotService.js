@@ -40,20 +40,29 @@ class TelegramBotService {
    * handleMessages method for further processing.
    */
   startListenMessages() {
-    this.bot.on(EVENTS.MESSAGE, msg => {
-      // console.log(msg);
-      const chatId = msg.chat.id;
-      const message = msg.text;
-      console.log(message);
+    this.bot.on(EVENTS.MESSAGE, msg => this.handleMessages(msg));
+  }
 
-      ensureChatExists(chatId);
+  handleMessages(msg) {
+    const chatId = msg.chat.id;
+    const message = msg.text;
+    const voiceMessageFileId = msg.voice?.file_id;
 
-      if (isCommand(message)) {
-        return this.handleCommands(chatId, message);
-      }
+    ensureChatExists(chatId);
+    console.log(message, voiceMessageFileId);
+    if (voiceMessageFileId) {
+      return this.handleMessage(
+        chatId,
+        voiceMessageFileId,
+        EVENTS.VOICE_MESSAGE_FROM_TG
+      );
+    }
 
-      this.handleMessages(chatId, message);
-    });
+    if (message) {
+      return isCommand(message)
+        ? this.handleTextCommands(chatId, message)
+        : this.handleMessage(chatId, message);
+    }
   }
 
   /**
@@ -65,9 +74,9 @@ class TelegramBotService {
    */
   startListenUserSelection() {
     this.bot.on(EVENTS.CALLBACK_QUERY, async callbackQuery => {
-      const chatId = callbackQuery?.message?.chat?.id;
-      const userSelection = callbackQuery?.data;
-      const messageId = callbackQuery?.message?.message_id;
+      const chatId = callbackQuery.message?.chat?.id;
+      const userSelection = callbackQuery.data;
+      const messageId = callbackQuery.message?.message_id;
 
       ensureChatExists(chatId);
 
@@ -78,18 +87,18 @@ class TelegramBotService {
     });
   }
 
-  async handleMessages(chatId, message) {
-    if (!message) return;
+  async handleMessage(chatId, payload, event = EVENTS.MESSAGE_FROM_TG) {
+    if (!payload) return;
 
-    this.emit(EVENTS.MESSAGE_FROM_TG, {
+    this.emit(event, {
       chatId,
-      message,
+      payload,
       role: CHAT_ROLES.USER,
     });
     this.startTypingIndicator(chatId);
   }
 
-  handleCommands(chatId, message) {
+  handleTextCommands(chatId, message) {
     const commands = {
       [COMMANDS.START]: () =>
         this.send({
