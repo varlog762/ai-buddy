@@ -1,6 +1,6 @@
 // TODO: delete 'telegramify-markdown' or 'markdown-it' from project
-// import telegramifyMarkdown from 'telegramify-markdown';
-import markdownit from 'markdown-it';
+import telegramifyMarkdown from 'telegramify-markdown';
+// import markdownit from 'markdown-it';
 import {
   MAX_TELEGRAM_CONTENT_LENGTH,
   COMMANDS,
@@ -36,12 +36,14 @@ export const escapeMarkdownV2 = text =>
  * @returns {string} The formatted message.
  */
 export const formatMarkdownMessageToHtml = (message = '') => {
-  const md = markdownit({
-    html: false,
-    breaks: true,
-  });
-  const formattedMessage = md.renderInline(message);
-  return deleteBrTags(formattedMessage);
+  // const md = markdownit({
+  //   html: false,
+  //   breaks: true,
+  // });
+  // const formattedMessage = md.renderInline(message);
+  // return deleteBrTags(formattedMessage);
+  console.log('Formatted!');
+  return telegramifyMarkdown(message);
 };
 // telegramifyMarkdown(message, formatOption);
 

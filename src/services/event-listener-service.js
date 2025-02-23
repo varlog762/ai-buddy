@@ -45,8 +45,6 @@ const handleAIMessage = async (telegramBot, eventData) => {
     for (const chunk of messageChunks) {
       await telegramBot.send({ chatId, message: chunk });
     }
-
-    await telegramBot.send({ chatId, message });
   } catch (error) {
     console.error(`Error handling event ${EVENTS.MESSAGE_FROM_AI}:`, error);
   }

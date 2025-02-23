@@ -138,8 +138,8 @@ class TelegramBotService {
     this.stopTypingIndicator();
 
     try {
-      const formattedMessage = formatMarkdownMessageToHtml(message);
-      await this.bot.sendMessage(chatId, formattedMessage, {
+      // const formattedMessage = formatMarkdownMessageToHtml(message);
+      await this.bot.sendMessage(chatId, message, {
         parse_mode: 'html',
         ...inlineKeyboard,
       });
