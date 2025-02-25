@@ -8,7 +8,8 @@ import {
 } from '../constants/index.js';
 
 export * from './inline-keyboards.js';
-export * from './get-data.js';
+export * from './telegram-file.js';
+export * from './audio-utils.js';
 
 const COMMANDS_SET = new Set(Object.values(COMMANDS));
 const AI_MODELS_SET = new Set(Object.values(AI_MODELS));
@@ -21,7 +22,7 @@ export const splitMessageForTelegram = message => {
   return chunks;
 };
 
-const deleteBrTags = message => message.replace(/<br>/g, '');
+// const deleteBrTags = message => message.replace(/<br>/g, '');
 
 export const escapeMarkdownV2 = text =>
   text.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
