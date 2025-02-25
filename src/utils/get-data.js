@@ -9,7 +9,7 @@ const getFilePath = async voiceMessageFileId => {
   return fileInfo.result?.file_path;
 };
 
-export const getVoiceMessage = async voiceMessageFileId => {
+export const getVoiceMessageFromTelegram = async voiceMessageFileId => {
   const filePath = await getFilePath(voiceMessageFileId);
   const url = `${baseUrl}file/bot${token}/${filePath}`;
   const response = await fetch(url);

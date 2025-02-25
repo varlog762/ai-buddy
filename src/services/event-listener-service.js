@@ -5,7 +5,7 @@ import {
   deleteChatHistory,
   getCurrentModelName,
 } from './supabase.js';
-import { handleLongText, getVoiceMessage } from '../utils/index.js';
+import { handleLongText, getVoiceMessageFromTelegram } from '../utils/index.js';
 
 const handleTelegramTextMessage = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
@@ -71,7 +71,8 @@ export const startEventListeners = services => {
     }
 
     try {
-      const voiceMessage = await getVoiceMessage(voiceMessageFileId);
+      const voiceMessage =
+        await getVoiceMessageFromTelegram(voiceMessageFileId);
       console.log(voiceMessage);
     } catch (error) {
       console.error(error);
