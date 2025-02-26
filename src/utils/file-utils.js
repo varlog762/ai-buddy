@@ -36,3 +36,23 @@ const handleDirectoryCreation = async dirName => {
     console.error(error);
   }
 };
+
+// Функция для сохранения файла с использованием потоков
+export const saveFileStream = async (buffer, fileName, dirName = 'audio') => {
+  const filePath = path.join(projectPath, dirName, fileName);
+  console.log(filePath);
+
+  await handleDirectoryCreation(dirName);
+
+  const writeStream = fs.createWriteStream(filePath);
+  writeStream.write(buffer);
+  writeStream.end();
+
+  writeStream.on('finish', () => {
+    console.log(`File ${fileName} has been saved successfully.`);
+  });
+
+  writeStream.on('error', err => {
+    console.error('Error writing the file:', err);
+  });
+};
