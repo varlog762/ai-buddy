@@ -68,8 +68,7 @@ export const startEventListeners = services => {
   eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
     const {
       chatId,
-      payload: voiceMessageFileId,
-      voiceMessageFileUniqueId,
+      payload: { voiceMessageFileId, voiceMessageFileUniqueId },
       role,
     } = eventData || {};
 
@@ -86,8 +85,7 @@ export const startEventListeners = services => {
       const buffer = await convertBlobToBuffer(blob);
 
       const fileName = createFileName(chatId, voiceMessageFileUniqueId, 'ogg');
-
-      await saveFileStream(buffer, new Date().toString());
+      await saveFileStream(buffer, fileName);
     } catch (error) {
       console.error(error);
     }

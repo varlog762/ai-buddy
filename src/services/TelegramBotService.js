@@ -54,8 +54,7 @@ class TelegramBotService {
     if (voiceMessageFileId) {
       return this.handleMessage(
         chatId,
-        voiceMessageFileId,
-        voiceMessageFileUniqueId,
+        { voiceMessageFileId, voiceMessageFileUniqueId },
         EVENTS.VOICE_MESSAGE_FROM_TG
       );
     }
