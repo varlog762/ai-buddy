@@ -10,6 +10,7 @@ import {
 export * from './inline-keyboards.js';
 export * from './telegram-file.js';
 export * from './audio-utils.js';
+export * from './file-utils.js';
 
 const COMMANDS_SET = new Set(Object.values(COMMANDS));
 const AI_MODELS_SET = new Set(Object.values(AI_MODELS));

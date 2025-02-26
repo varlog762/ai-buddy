@@ -9,6 +9,8 @@ import {
   handleLongText,
   getVoiceMessageFromTelegram,
   convertBlobToBuffer,
+  saveFileStream,
+  createFileName,
 } from '../utils/index.js';
 
 const handleTelegramTextMessage = async (aiBot, eventData) => {
@@ -64,7 +66,12 @@ export const startEventListeners = services => {
   );
 
   eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
-    const { chatId, payload: voiceMessageFileId, role } = eventData || {};
+    const {
+      chatId,
+      payload: voiceMessageFileId,
+      voiceMessageFileUniqueId,
+      role,
+    } = eventData || {};
 
     if (!chatId || !voiceMessageFileId || !role) {
       console.error(
@@ -77,7 +84,10 @@ export const startEventListeners = services => {
     try {
       const blob = await getVoiceMessageFromTelegram(voiceMessageFileId);
       const buffer = await convertBlobToBuffer(blob);
-      console.log(buffer);
+
+      const fileName = createFileName(chatId, voiceMessageFileUniqueId, 'ogg');
+
+      await saveFileStream(buffer, new Date().toString());
     } catch (error) {
       console.error(error);
     }

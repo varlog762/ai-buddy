@@ -1,12 +1,18 @@
-import { promises as fs } from 'fs';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-const projectPath = path.dirname(fileURLToPath(import.meta.url));
+export const createFileName = (chatId, fileId, extension) =>
+  `${chatId}_${fileId}.${extension}`;
+
+const projectPath = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..'
+);
 
 const isDirectoryExists = async absolutePath => {
   try {
-    const stats = await fs.stat(absolutePath);
+    const stats = await fs.promises.stat(absolutePath);
     return stats.isDirectory();
   } catch (error) {
     return false;
@@ -15,7 +21,7 @@ const isDirectoryExists = async absolutePath => {
 
 const mkDir = async absolutePath => {
   try {
-    await fs.mkdir(absolutePath);
+    await fs.promises.mkdir(absolutePath);
     console.log(absolutePath, ' created!');
   } catch (error) {
     console.error('Error creating directory: ', error);
@@ -40,7 +46,6 @@ const handleDirectoryCreation = async dirName => {
 // Функция для сохранения файла с использованием потоков
 export const saveFileStream = async (buffer, fileName, dirName = 'audio') => {
   const filePath = path.join(projectPath, dirName, fileName);
-  console.log(filePath);
 
   await handleDirectoryCreation(dirName);
 

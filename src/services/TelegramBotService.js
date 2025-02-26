@@ -47,6 +47,7 @@ class TelegramBotService {
     const chatId = msg.chat.id;
     const message = msg.text;
     const voiceMessageFileId = msg.voice?.file_id;
+    const voiceMessageFileUniqueId = msg.voice?.file_unique_id;
 
     ensureChatExists(chatId);
 
@@ -54,6 +55,7 @@ class TelegramBotService {
       return this.handleMessage(
         chatId,
         voiceMessageFileId,
+        voiceMessageFileUniqueId,
         EVENTS.VOICE_MESSAGE_FROM_TG
       );
     }
