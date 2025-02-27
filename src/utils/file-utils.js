@@ -11,8 +11,8 @@ export const getAbsolutePath = (dirName, fileName) => {
   path.join(projectPath, dirName, fileName);
 };
 
-export const createFileName = (chatId, fileId, extension) =>
-  `${chatId}_${fileId}.${extension}`;
+export const createFileName = (chatId, extension) =>
+  `${chatId}_${Date.now().toString()}.${extension}`;
 
 const isDirectoryExists = async absolutePath => {
   try {

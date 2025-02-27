@@ -5,13 +5,10 @@ import {
   deleteChatHistory,
   getCurrentModelName,
 } from './supabase.js';
-import {
-  handleLongText,
-  getBufferFromTelegramVoiceMessage,
-  saveFileStream,
-  createFileName,
-} from '../utils/index.js';
-import { checkFfmpegAvailable } from './media-converter.js';
+import { handleLongText } from '../utils/index.js';
+import { getBufferFromTelegramVoiceMessage } from '../utils/telegram-file.js';
+import { saveFileStream, createFileName } from '../utils/file-utils.js';
+// import { checkFfmpegAvailable } from './media-converter.js';
 
 const handleTelegramTextMessage = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
@@ -66,13 +63,8 @@ export const startEventListeners = services => {
   );
 
   eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
-    const {
-      chatId,
-      payload: { voiceMessageFileId, voiceMessageFileUniqueId },
-      role,
-    } = eventData || {};
-
-    if (!chatId || !voiceMessageFileId || !role) {
+    const { chatId, payload: fileId, role } = eventData || {};
+    if (!chatId || !fileId || !role) {
       console.error(
         `Invalid event data for ${EVENTS.VOICE_MESSAGE_FROM_TG}:`,
         eventData
@@ -81,10 +73,9 @@ export const startEventListeners = services => {
     }
 
     try {
-      const buffer =
-        await getBufferFromTelegramVoiceMessage(voiceMessageFileId);
+      const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
-      const fileName = createFileName(chatId, voiceMessageFileUniqueId, 'ogg');
+      const fileName = createFileName(chatId, 'ogg');
       await saveFileStream(buffer, fileName);
     } catch (error) {
       console.error(error);

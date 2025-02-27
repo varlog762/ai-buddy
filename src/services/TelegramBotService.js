@@ -7,8 +7,8 @@ import {
   CHAT_ROLES,
   ERRORS,
 } from '../constants/index.js';
+import { inlineKeyboards } from '../constants/inline-keyboards.js';
 import { ensureChatExists } from './supabase.js';
-import { inlineKeyboards } from '../utils/inline-keyboards.js';
 import {
   isCommand,
   isModel,
@@ -47,14 +47,13 @@ class TelegramBotService {
     const chatId = msg.chat.id;
     const message = msg.text;
     const voiceMessageFileId = msg.voice?.file_id;
-    const voiceMessageFileUniqueId = msg.voice?.file_unique_id;
 
     ensureChatExists(chatId);
 
     if (voiceMessageFileId) {
       return this.handleMessage(
         chatId,
-        { voiceMessageFileId, voiceMessageFileUniqueId },
+        voiceMessageFileId,
         EVENTS.VOICE_MESSAGE_FROM_TG
       );
     }

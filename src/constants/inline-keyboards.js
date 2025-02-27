@@ -1,4 +1,4 @@
-import { AI_MODELS } from '../constants/index.js';
+import { AI_MODELS } from './index.js';
 
 export const inlineKeyboards = {
   modelSelection: {
