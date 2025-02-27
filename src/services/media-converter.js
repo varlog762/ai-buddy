@@ -1,5 +1,5 @@
 import ffmpeg from 'fluent-ffmpeg';
-import { projectPath } from '../utils/index.js';
+import { handleDirectoryCreation } from '../utils/file-utils.js';
 
 export const isFfmpegInstalled = () => {
   let isInstalled = false;
@@ -17,8 +17,7 @@ export const isFfmpegInstalled = () => {
 
 export const convertOggToWav = async oggFilePath => {
   try {
-    // Проверяем, существует ли папка audio
-    await fs.mkdir(audioDir, { recursive: true });
+    await handleDirectoryCreation('audio');
 
     // Генерируем имя выходного файла (заменяем расширение)
     const wavFilePath = oggFilePath.replace('.ogg', '.wav');

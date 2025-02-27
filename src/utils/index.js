@@ -9,7 +9,6 @@ import {
 
 export * from './inline-keyboards.js';
 export * from './telegram-file.js';
-export * from './audio-utils.js';
 export * from './file-utils.js';
 
 const COMMANDS_SET = new Set(Object.values(COMMANDS));
@@ -132,4 +131,10 @@ export const handleLongText = (
   }
 
   return chunks;
+};
+
+export const convertBlobToBuffer = async blob => {
+  const arrayBuffer = await blob.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return buffer;
 };

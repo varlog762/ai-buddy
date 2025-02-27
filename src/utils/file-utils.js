@@ -2,12 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-export const projectPath = path.resolve(
+const projectPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..'
 );
 
-export const audioDir = path.join(projectPath, 'src/audio');
+export const getAbsolutePath = (dirName, fileName) => {
+  path.join(projectPath, dirName, fileName);
+};
 
 export const createFileName = (chatId, fileId, extension) =>
   `${chatId}_${fileId}.${extension}`;
@@ -30,7 +32,7 @@ const mkDir = async absolutePath => {
   }
 };
 
-const handleDirectoryCreation = async dirName => {
+export const handleDirectoryCreation = async dirName => {
   try {
     const absolutePath = path.join(projectPath, dirName);
 

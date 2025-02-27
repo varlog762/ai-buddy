@@ -7,8 +7,7 @@ import {
 } from './supabase.js';
 import {
   handleLongText,
-  getVoiceMessageFromTelegram,
-  convertBlobToBuffer,
+  getBufferFromTelegramVoiceMessage,
   saveFileStream,
   createFileName,
 } from '../utils/index.js';
@@ -82,12 +81,11 @@ export const startEventListeners = services => {
     }
 
     try {
-      const blob = await getVoiceMessageFromTelegram(voiceMessageFileId);
-      const buffer = await convertBlobToBuffer(blob);
+      const buffer =
+        await getBufferFromTelegramVoiceMessage(voiceMessageFileId);
 
       const fileName = createFileName(chatId, voiceMessageFileUniqueId, 'ogg');
-      checkFfmpegAvailable();
-      // await saveFileStream(buffer, fileName);
+      await saveFileStream(buffer, fileName);
     } catch (error) {
       console.error(error);
     }
