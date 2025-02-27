@@ -2,13 +2,15 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-export const createFileName = (chatId, fileId, extension) =>
-  `${chatId}_${fileId}.${extension}`;
-
-const projectPath = path.resolve(
+export const projectPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..'
 );
+
+export const audioDir = path.join(projectPath, 'src/audio');
+
+export const createFileName = (chatId, fileId, extension) =>
+  `${chatId}_${fileId}.${extension}`;
 
 const isDirectoryExists = async absolutePath => {
   try {

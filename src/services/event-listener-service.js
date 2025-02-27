@@ -12,6 +12,7 @@ import {
   saveFileStream,
   createFileName,
 } from '../utils/index.js';
+import { checkFfmpegAvailable } from './media-converter.js';
 
 const handleTelegramTextMessage = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
@@ -85,7 +86,8 @@ export const startEventListeners = services => {
       const buffer = await convertBlobToBuffer(blob);
 
       const fileName = createFileName(chatId, voiceMessageFileUniqueId, 'ogg');
-      await saveFileStream(buffer, fileName);
+      checkFfmpegAvailable();
+      // await saveFileStream(buffer, fileName);
     } catch (error) {
       console.error(error);
     }
