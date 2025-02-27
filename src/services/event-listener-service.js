@@ -10,7 +10,7 @@ import { getBufferFromTelegramVoiceMessage } from '../utils/telegram-file.js';
 import { saveFileStream, createFileName } from '../utils/file-utils.js';
 // import { checkFfmpegAvailable } from './media-converter.js';
 
-const handleTelegramTextMessage = async (aiBot, eventData) => {
+const handleTextMessageFromTelegram = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
@@ -29,7 +29,7 @@ const handleTelegramTextMessage = async (aiBot, eventData) => {
   }
 };
 
-const handleAIMessage = async (telegramBot, eventData) => {
+const handleMessageFromLLM = async (telegramBot, eventData) => {
   const { chatId, message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
@@ -59,7 +59,7 @@ export const startEventListeners = services => {
   telegramBot.startListeners();
 
   eventEmitter.on(EVENTS.MESSAGE_FROM_TG, eventData =>
-    handleTelegramTextMessage(aiBot, eventData)
+    handleTextMessageFromTelegram(aiBot, eventData)
   );
 
   eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
@@ -83,7 +83,7 @@ export const startEventListeners = services => {
   });
 
   eventEmitter.on(EVENTS.MESSAGE_FROM_AI, eventData =>
-    handleAIMessage(telegramBot, eventData)
+    handleMessageFromLLM(telegramBot, eventData)
   );
 
   eventEmitter.on(EVENTS.CLEAR_CHAT_HISTORY, async chatId => {
