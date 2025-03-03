@@ -7,9 +7,8 @@ const projectPath = path.resolve(
   '..'
 );
 
-export const getAbsolutePath = (dirName, fileName) => {
+export const getAbsoluteFilePath = (dirName, fileName) =>
   path.join(projectPath, dirName, fileName);
-};
 
 export const createFileName = (chatId, extension) =>
   `${chatId}_${Date.now().toString()}.${extension}`;

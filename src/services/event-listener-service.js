@@ -7,7 +7,11 @@ import {
 } from './supabase.js';
 import { handleLongText } from '../utils/index.js';
 import { getBufferFromTelegramVoiceMessage } from '../utils/telegram-file.js';
-import { saveFileStream, createFileName } from '../utils/file-utils.js';
+import {
+  saveFileStream,
+  createFileName,
+  getAbsoluteFilePath,
+} from '../utils/file-utils.js';
 // import { checkFfmpegAvailable } from './media-converter.js';
 
 const handleTextMessageFromTelegram = async (aiBot, eventData) => {
@@ -76,6 +80,7 @@ export const startEventListeners = services => {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
       const fileName = createFileName(chatId, 'ogg');
+      const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
     } catch (error) {
       console.error(error);
