@@ -2,41 +2,37 @@ import ffmpeg from 'fluent-ffmpeg';
 import { handleDirectoryCreation } from '../utils/file-utils.js';
 
 export const isFfmpegInstalled = () => {
-  let isInstalled = false;
-
   ffmpeg.getAvailableFormats((err, formatsList) => {
-    if (err) {
-      isInstalled = false;
-    } else if (formatsList) {
-      isInstalled = true;
-    }
-  });
+    if (err) return false;
+    if (formatsList) return true;
 
-  return isInstalled;
+    return false;
+  });
 };
 
 export const convertOggToWav = async oggFilePath => {
   try {
+    if (!oggFilePath) throw new Error('No file path provided');
+    if (!isFfmpegInstalled()) throw new Error('FFmpeg not found!');
     await handleDirectoryCreation('audio');
 
-    // Генерируем имя выходного файла (заменяем расширение)
     const wavFilePath = oggFilePath.replace('.ogg', '.wav');
 
     return new Promise((resolve, reject) => {
       ffmpeg(oggFilePath)
-        .toFormat('wav') // Конвертируем в WAV
+        .toFormat('wav')
         .on('end', () => {
-          console.log(`Конвертация завершена: ${wavFilePath}`);
+          console.log(`File converted successfully: ${wavFilePath}`);
           resolve(wavFilePath);
         })
         .on('error', err => {
-          console.error('Ошибка конвертации:', err);
+          console.error('Conversion error:', err);
           reject(err);
         })
-        .save(wavFilePath); // Сохраняем файл
+        .save(wavFilePath);
     });
   } catch (error) {
-    console.error('Ошибка при обработке файла:', error);
+    console.error('File conversion error:', error);
     return null;
   }
 };
