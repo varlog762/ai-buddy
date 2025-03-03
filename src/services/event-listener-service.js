@@ -12,7 +12,7 @@ import {
   createFileName,
   getAbsoluteFilePath,
 } from '../utils/file-utils.js';
-// import { checkFfmpegAvailable } from './media-converter.js';
+import { convertOggToWav } from './media-converter.js';
 
 const handleTextMessageFromTelegram = async (aiBot, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
@@ -82,6 +82,7 @@ export const startEventListeners = services => {
       const fileName = createFileName(chatId, 'ogg');
       const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
+      await convertOggToWav(filePath);
     } catch (error) {
       console.error(error);
     }

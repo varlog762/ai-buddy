@@ -1,7 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { handleDirectoryCreation } from '../utils/file-utils.js';
 
-export const isFfmpegInstalled = () => {
+export const isFfmpegInstalled = async () => {
   ffmpeg.getAvailableFormats((err, formatsList) => {
     if (err) return false;
     if (formatsList) return true;
@@ -29,7 +29,10 @@ export const convertOggToWav = async oggFilePath => {
           console.error('Conversion error:', err);
           reject(err);
         })
-        .save(wavFilePath);
+        .save(wavFilePath)
+        .finally(() => {
+          ffmpeg.reset();
+        });
     });
   } catch (error) {
     console.error('File conversion error:', error);

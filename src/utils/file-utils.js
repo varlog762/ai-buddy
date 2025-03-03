@@ -35,10 +35,7 @@ export const handleDirectoryCreation = async dirName => {
   try {
     const absolutePath = path.join(projectPath, dirName);
 
-    if (await isDirectoryExists(absolutePath)) {
-      console.log(absolutePath, ' already exists');
-      return;
-    }
+    if (await isDirectoryExists(absolutePath)) return;
 
     await mkDir(absolutePath);
   } catch (error) {
@@ -46,7 +43,6 @@ export const handleDirectoryCreation = async dirName => {
   }
 };
 
-// Функция для сохранения файла с использованием потоков
 export const saveFileStream = async (buffer, fileName, dirName = 'audio') => {
   const filePath = path.join(projectPath, dirName, fileName);
 
@@ -63,4 +59,12 @@ export const saveFileStream = async (buffer, fileName, dirName = 'audio') => {
   writeStream.on('error', err => {
     console.error('Error writing the file:', err);
   });
+};
+
+export const deleteFile = async filePath => {
+  try {
+    await fs.promises.unlink(filePath);
+  } catch (error) {
+    console.error('Error deleting file:', error);
+  }
 };
