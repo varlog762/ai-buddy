@@ -4,6 +4,7 @@ export * from './ai-models.js';
 export * from './error-messages.js';
 export * from './messages-for-user.js';
 export * from './chat-commands.js';
+export * from './extensions.js';
 
 export const MAX_TELEGRAM_CONTENT_LENGTH = 4096;
 
