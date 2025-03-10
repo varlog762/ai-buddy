@@ -1,4 +1,4 @@
 export const EXTENSIONS = {
-  WAV: '.wav',
-  OGG: '.ogg',
+  WAV: 'wav',
+  OGG: 'ogg',
 };

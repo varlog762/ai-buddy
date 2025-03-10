@@ -1,4 +1,4 @@
-import { EVENTS, MESSAGES_TO_USER } from '../constants/index.js';
+import { EVENTS, MESSAGES_TO_USER, EXTENSIONS } from '../constants/index.js';
 import {
   saveMessageToDB,
   updateLLM,
@@ -79,7 +79,7 @@ export const startEventListeners = services => {
     try {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
-      const fileName = createFileName(chatId, 'ogg');
+      const fileName = createFileName(chatId, EXTENSIONS.OGG);
       const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
       await convertOggToWav(filePath);

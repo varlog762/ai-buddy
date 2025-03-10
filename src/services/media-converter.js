@@ -1,5 +1,6 @@
 import ffmpeg from 'fluent-ffmpeg';
 import { handleDirectoryCreation, deleteFile } from '../utils/file-utils.js';
+import { EXTENSIONS } from '../constants/index.js';
 
 export const isFfmpegInstalled = async () => {
   ffmpeg.getAvailableFormats((err, formatsList) => {
@@ -16,11 +17,11 @@ export const convertOggToWav = async oggFilePath => {
     if (!isFfmpegInstalled()) throw new Error('FFmpeg not found!');
     await handleDirectoryCreation('audio');
 
-    const wavFilePath = oggFilePath.replace('.ogg', '.wav');
+    const wavFilePath = oggFilePath.replace(EXTENSIONS.OGG, EXTENSIONS.WAV);
 
     return new Promise((resolve, reject) => {
       ffmpeg(oggFilePath)
-        .toFormat('wav')
+        .toFormat(EXTENSIONS.WAV)
         .on('end', () => {
           console.log(`File converted successfully: ${wavFilePath}`);
           resolve(wavFilePath);
