@@ -37,10 +37,7 @@ const handleMessageFromLLM = async (telegramBot, eventData) => {
   const { chatId, message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
-    console.error(
-      `Invalid event data for ${EVENTS.MESSAGE_FROM_AI}:`,
-      eventData
-    );
+    console.error(`Invalid event data for ${EVENTS.MESSAGE_TO_TG}:`, eventData);
     return;
   }
 
@@ -53,7 +50,7 @@ const handleMessageFromLLM = async (telegramBot, eventData) => {
       await telegramBot.send({ chatId, message: chunk });
     }
   } catch (error) {
-    console.error(`Error handling event ${EVENTS.MESSAGE_FROM_AI}:`, error);
+    console.error(`Error handling event ${EVENTS.MESSAGE_TO_TG}:`, error);
   }
 };
 
@@ -76,7 +73,14 @@ export const startEventListeners = services => {
       return;
     }
 
-    eventEmitter.emit(EVENTS.)
+    const message = await telegramBot.send({
+      chatId,
+      message: 'Your voice message is being processed, please wait...',
+    });
+
+    const messageId = message.message_id;
+
+    setTimeout(() => telegramBot.deleteMessage(chatId, messageId), 1000);
 
     try {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
@@ -85,12 +89,14 @@ export const startEventListeners = services => {
       const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
       await convertOggToWav(filePath);
+
+      const answer = fetch();
     } catch (error) {
       console.error(error);
     }
   });
 
-  eventEmitter.on(EVENTS.MESSAGE_FROM_AI, eventData =>
+  eventEmitter.on(EVENTS.MESSAGE_TO_TG, eventData =>
     handleMessageFromLLM(telegramBot, eventData)
   );
 

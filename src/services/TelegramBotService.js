@@ -44,7 +44,7 @@ class TelegramBotService {
   }
 
   handleMessages(msg) {
-    const chatId = msg.chat.id;
+    const chatId = msg.chat?.id;
     const message = msg.text;
     const voiceMessageFileId = msg.voice?.file_id;
 
@@ -150,7 +150,7 @@ class TelegramBotService {
 
     try {
       // const formattedMessage = formatMarkdownMessageToHtml(message);
-      await this.bot.sendMessage(chatId, message, {
+      return await this.bot.sendMessage(chatId, message, {
         parse_mode: 'html',
         ...inlineKeyboard,
       });

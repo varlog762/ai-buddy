@@ -74,7 +74,7 @@ class AIChatService {
    */
   emit(chatId, message) {
     // Emit an event indicating a message from the AI
-    this.eventEmitter.emit(EVENTS.MESSAGE_FROM_AI, {
+    this.eventEmitter.emit(EVENTS.MESSAGE_TO_TG, {
       chatId,
       message,
       role: CHAT_ROLES.ASSISTANT,
