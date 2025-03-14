@@ -76,6 +76,8 @@ export const startEventListeners = services => {
       return;
     }
 
+    eventEmitter.emit(EVENTS.)
+
     try {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
