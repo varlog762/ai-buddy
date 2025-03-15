@@ -139,11 +139,17 @@ class TelegramBotService {
   }
 
   /**
-   * Sends a message to a specific chat ID.
+   * Sends a message to a specified chat.
    *
-   * @param {Object} params - The parameters for sending a message.
-   * @param {number} params.chatId - The ID of the chat where the message will be sent.
-   * @param {string} params.message - The message to be sent.
+   * This method stops the typing indicator before sending the message.
+   * It attempts to send the message with HTML formatting and an optional inline keyboard.
+   * If an error occurs, it calls `handleErrorSendingMessage` to handle the failure.
+   *
+   * @param {Object} options - The message options.
+   * @param {number} options.chatId - The ID of the chat where the message should be sent.
+   * @param {string} options.message - The message text to send.
+   * @param {Object} [options.inlineKeyboard={}] - Optional inline keyboard buttons.
+   * @returns {Promise<void>} A promise that resolves when the message is sent.
    */
   async send({ chatId, message, inlineKeyboard = {} }) {
     this.stopTypingIndicator();
