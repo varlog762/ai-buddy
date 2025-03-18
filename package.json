@@ -30,6 +30,7 @@
     "telegramify-markdown": "^1.2.2"
   },
   "devDependencies": {
+    "@types/node": "^22.13.10",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-node": "^4.1.0",
