@@ -1,4 +1,3 @@
-import OpenAI from 'openai';
 import { Events, MESSAGES_TO_USER, Extensions } from '../enums';
 import {
   saveMessageToDB,
@@ -14,8 +13,13 @@ import {
   getAbsoluteFilePath,
 } from '../utils/file-utils.js';
 import { convertOggToWav } from './media-converter.js';
+import AIChatService from './AiChatService';
+import TelegramBotService from './TelegramBotService';
 
-const handleTextMessageFromTelegram = async (aiBot: OpenAI, eventData) => {
+const handleTextMessageFromTelegram = async (
+  aiBot: AIChatService,
+  eventData
+) => {
   const { chatId, payload: message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
@@ -28,13 +32,16 @@ const handleTextMessageFromTelegram = async (aiBot: OpenAI, eventData) => {
 
   try {
     await saveMessageToDB({ chatId, message, role });
-    await aiBot.send({ chatId, message });
+    await aiBot.send(chatId);
   } catch (error) {
     console.error(`Error handling event ${Events.MESSAGE_FROM_TG}:`, error);
   }
 };
 
-const handleMessageFromLLM = async (telegramBot, eventData) => {
+const handleMessageFromLLM = async (
+  telegramBot: TelegramBotService,
+  eventData
+) => {
   const { chatId, message, role } = eventData || {};
 
   if (!chatId || !message || !role) {

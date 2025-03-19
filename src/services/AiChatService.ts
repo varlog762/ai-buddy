@@ -16,7 +16,7 @@ class AIChatService {
     this.eventEmitter = eventEmitter;
   }
 
-  async send({ chatId }) {
+  async send(chatId: string) {
     try {
       const options = await this.getChatOptions(chatId);
 

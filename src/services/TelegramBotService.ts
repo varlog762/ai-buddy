@@ -1,12 +1,12 @@
 /* eslint-disable consistent-return */
 import TelegramBot from 'node-telegram-bot-api';
 import {
-  MESSAGES_TO_USER,
-  COMMANDS,
-  EVENTS,
-  CHAT_ROLES,
-  ERRORS,
-} from '../constants/index.js';
+  SystemMessages,
+  ChatCommands,
+  Events,
+  ChatRoles,
+  ErrorMessages,
+} from '../enums/index';
 import { inlineKeyboards } from '../constants/inline-keyboards.js';
 import { ensureChatExists } from './supabase.js';
 import {
@@ -14,11 +14,14 @@ import {
   isModel,
   formatMarkdownMessageToHtml,
 } from '../utils/index.js';
+import EventEmitter from 'node:events';
 
 class TelegramBotService {
-  typingIndicatorTimer = null;
+  typingIndicatorTimer: Timeout | null = null;
+  bot: TelegramBot;
+  eventEmitter: EventEmitter;
 
-  constructor(token, eventEmitter) {
+  constructor(token: string, eventEmitter: EventEmitter) {
     this.bot = new TelegramBot(token, { polling: true });
     this.eventEmitter = eventEmitter;
   }
@@ -27,7 +30,7 @@ class TelegramBotService {
    * Initializes the bot listeners for handling incoming messages
    * and user selections from callback queries.
    */
-  startListeners() {
+  startListeners(): void {
     // Start listening for regular messages
     this.startListenMessages();
 
@@ -39,11 +42,11 @@ class TelegramBotService {
    * Listens for incoming messages and passes them to the
    * handleMessages method for further processing.
    */
-  startListenMessages() {
-    this.bot.on(EVENTS.MESSAGE, msg => this.handleMessages(msg));
+  startListenMessages(): void {
+    this.bot.on(Events.MESSAGE, msg => this.handleMessages(msg));
   }
 
-  handleMessages(msg) {
+  handleMessages(msg: TelegramBot.Message) {
     const chatId = msg.chat?.id;
     const message = msg.text;
     const voiceMessageFileId = msg.voice?.file_id;
@@ -54,7 +57,7 @@ class TelegramBotService {
       return this.handleMessage(
         chatId,
         voiceMessageFileId,
-        EVENTS.VOICE_MESSAGE_FROM_TG
+        Events.VOICE_MESSAGE_FROM_TG
       );
     }
 
@@ -73,7 +76,7 @@ class TelegramBotService {
    * The message is then deleted using the deleteMessage method.
    */
   startListenUserSelection() {
-    this.bot.on(EVENTS.CALLBACK_QUERY, async callbackQuery => {
+    this.bot.on(Events.CALLBACK_QUERY, async callbackQuery => {
       const chatId = callbackQuery.message?.chat?.id;
       const userSelection = callbackQuery.data;
       const messageId = callbackQuery.message?.message_id;
@@ -87,34 +90,39 @@ class TelegramBotService {
     });
   }
 
-  async handleMessage(chatId, payload, event = EVENTS.MESSAGE_FROM_TG) {
+  async handleMessage(
+    chatId: string | number,
+    payload: string,
+    event = Events.MESSAGE_FROM_TG
+  ) {
     if (!payload) return;
 
-    this.emit(event, { chatId, payload, role: CHAT_ROLES.USER });
+    this.emit(event, { chatId, payload, role: ChatRoles.USER });
     this.startTypingIndicator(chatId);
   }
 
-  handleCommands(chatId, message) {
+  handleCommands(chatId: number, message: string) {
     const commands = {
-      [COMMANDS.START]: () =>
+      [ChatCommands.START]: () =>
         this.send({
           chatId,
-          message: MESSAGES_TO_USER.START,
+          message: SystemMessages.START,
           inlineKeyboard: inlineKeyboards.defaultOption,
         }),
-      [COMMANDS.CLEAR_CHAT_HISTORY]: () =>
+      [ChatCommands.CLEAR_CHAT_HISTORY]: () =>
         this.send({
           chatId,
-          message: MESSAGES_TO_USER.DELETE_CHAT_HISTORY_CONFIRMATION,
+          message: SystemMessages.DELETE_CHAT_HISTORY_CONFIRMATION,
           inlineKeyboard: inlineKeyboards.clearChatHistory,
         }),
-      [COMMANDS.CHANGE_MODEL]: () =>
+      [ChatCommands.CHANGE_MODEL]: () =>
         this.send({
           chatId,
-          message: MESSAGES_TO_USER.CHOOSE_MODEL,
+          message: SystemMessages.CHOOSE_MODEL,
           inlineKeyboard: inlineKeyboards.modelSelection,
         }),
-      [COMMANDS.SHOW_MODEL]: () => this.emit(EVENTS.SHOW_CURRENT_LLM, chatId),
+      [ChatCommands.SHOW_MODEL]: () =>
+        this.emit(Events.SHOW_CURRENT_LLM, chatId),
     };
 
     if (commands[message]) {
@@ -122,7 +130,7 @@ class TelegramBotService {
     }
   }
 
-  handleUserSelection(chatId, userSelection) {
+  handleUserSelection(chatId: string, userSelection: string) {
     this.handleStartCommandSelection(chatId, userSelection);
 
     if (isModel(userSelection)) {
@@ -130,7 +138,7 @@ class TelegramBotService {
     }
 
     if (userSelection === 'clear-history') {
-      this.emit(EVENTS.CLEAR_CHAT_HISTORY, chatId);
+      this.emit(Events.CLEAR_CHAT_HISTORY, chatId);
     }
   }
 
@@ -167,12 +175,17 @@ class TelegramBotService {
   }
 
   // TODO: refactor handleErrorSendingMessage
-  async handleErrorSendingMessage(error, chatId, message, inlineKeyboard = {}) {
+  async handleErrorSendingMessage(
+    error: unknown,
+    chatId: TelegramBot.ChatId,
+    message: string,
+    inlineKeyboard = {}
+  ) {
     if (error.message.includes("can't parse entities")) {
       try {
         await this.bot.sendMessage(chatId, message, { ...inlineKeyboard });
       } catch (sendError) {
-        await this.bot.sendMessage(chatId, ERRORS.SOMETHING_WRONG);
+        await this.bot.sendMessage(chatId, ErrorMessages.SOMETHING_WRONG);
       } finally {
         console.error(error.message);
       }
@@ -185,7 +198,7 @@ class TelegramBotService {
    * @param {string} event - The name of the event to emit.
    * @param {Object} payload - The payload to be sent with the event.
    */
-  emit(event, payload) {
+  emit(event: Events, payload: string) {
     this.eventEmitter.emit(event, payload);
   }
 
@@ -195,7 +208,7 @@ class TelegramBotService {
    * @param {number} chatId - The ID of the chat where the message was sent.
    * @param {number} messageId - The ID of the message to be deleted.
    */
-  async deleteMessage(chatId, messageId) {
+  async deleteMessage(chatId: string, messageId: number): Promise<void> {
     try {
       if (!messageId) return;
       // Attempt to delete the message
@@ -213,7 +226,7 @@ class TelegramBotService {
    * @param {string} chatId
    * @param {number} [timer=700] - time in milliseconds to start the typing indicator
    */
-  async startTypingIndicator(chatId, timer = 700) {
+  async startTypingIndicator(chatId: string, timer: number = 700) {
     const action = 'typing';
 
     if (!chatId) {
@@ -241,7 +254,7 @@ class TelegramBotService {
    * @param {string} chatId - The ID of the chat where the action will be sent.
    * @param {string} action - The action to be performed (e.g., 'typing').
    */
-  async sendChatAction(chatId, action) {
+  async sendChatAction(chatId: TelegramBot.ChatId, action: string) {
     try {
       // Attempt to send the specified chat action to the given chat ID
       await this.bot.sendChatAction(chatId, action);
@@ -265,7 +278,7 @@ class TelegramBotService {
     }
   }
 
-  async handleStartCommandSelection(chatId, userSelection) {
+  async handleStartCommandSelection(chatId: string, userSelection: string) {
     if (userSelection === 'change-model') {
       this.send({
         chatId,
@@ -275,7 +288,10 @@ class TelegramBotService {
     }
   }
 
-  async handleChangeModelSelection(chatId, userSelection) {
+  async handleChangeModelSelection(
+    chatId: string,
+    userSelection: string | undefined
+  ) {
     const formattedSelection = formatMarkdownMessageToHtml(userSelection);
     await this.send({
       chatId,

@@ -1,4 +1,4 @@
-export enum MESSAGES_TO_USER {
+export enum SystemMessages {
   START = `*Welcome to AI Chat Bot!* 🤖  
 
 This is an advanced AI-powered chat bot for Telegram, designed for intelligent and natural conversations with multiple Large Language Models (LLMs).  
