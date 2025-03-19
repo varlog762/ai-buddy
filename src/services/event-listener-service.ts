@@ -1,4 +1,4 @@
-import { Events, MESSAGES_TO_USER, Extensions } from '../enums';
+import { Events, SystemMessages, Extensions } from '../enums';
 import {
   saveMessageToDB,
   updateLLM,
@@ -122,7 +122,7 @@ export const startEventListeners = services => {
 
     telegramBot.send({
       chatId,
-      message: `${MESSAGES_TO_USER.SHOW_MODEL} ${model}`,
+      message: `${SystemMessages.SHOW_MODEL} ${model}`,
     });
   });
 };

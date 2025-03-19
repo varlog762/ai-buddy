@@ -6,6 +6,7 @@ import {
   Events,
   ChatRoles,
   ErrorMessages,
+  Formats,
 } from '../enums/index';
 import { inlineKeyboards } from '../constants/inline-keyboards.js';
 import { ensureChatExists } from './supabase.js';
@@ -161,7 +162,7 @@ class TelegramBotService {
     try {
       // const formattedMessage = formatMarkdownMessageToHtml(message);
       return await this.bot.sendMessage(chatId, message, {
-        parse_mode: 'html',
+        parse_mode: Formats.HTML,
         ...inlineKeyboard,
       });
     } catch (error) {
@@ -282,7 +283,7 @@ class TelegramBotService {
     if (userSelection === 'change-model') {
       this.send({
         chatId,
-        message: MESSAGES_TO_USER.CHOOSE_MODEL,
+        message: SystemMessages.CHOOSE_MODEL,
         inlineKeyboard: inlineKeyboards.modelSelection,
       });
     }
@@ -299,7 +300,7 @@ class TelegramBotService {
     });
 
     // Emit an event indicating that a model has been selected
-    this.emit(EVENTS.LLM_SELECTED, { chatId, model: userSelection });
+    this.emit(Events.LLM_SELECTED, { chatId, model: userSelection });
   }
 }
 
