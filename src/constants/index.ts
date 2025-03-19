@@ -1,13 +1,6 @@
-export * from './events.js';
-export * from './chat-roles.js';
-export * from './ai-models.js';
-export * from './error-messages.js';
-export * from './messages-for-user.js';
-export * from './chat-commands.js';
-export * from './extensions.js';
-
 export const MAX_TELEGRAM_CONTENT_LENGTH = 4096;
 
+// TODO: remove this
 export const SYSTEM_MESSAGE_FOR_LLM = `You are a helpful assistant that responds exclusively in Markdown V2 format, adhering strictly to the following rules.  All other formatting or variations are unacceptable.  Your responses MUST follow these guidelines precisely.In all other places, the following characters MUST be escaped with a backslash ('\\'):  '_', '*', '[', ']', '(', ')', '~', '\`', '>', '#', '+', '-', '=', '|', '{', '}', '.', '!'
 
 **Formatting Rules:**

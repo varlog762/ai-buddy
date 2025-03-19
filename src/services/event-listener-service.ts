@@ -1,4 +1,5 @@
-import { EVENTS, MESSAGES_TO_USER, EXTENSIONS } from '../constants/index.js';
+import OpenAI from 'openai';
+import { Events, MESSAGES_TO_USER, Extensions } from '../enums';
 import {
   saveMessageToDB,
   updateLLM,
@@ -14,12 +15,12 @@ import {
 } from '../utils/file-utils.js';
 import { convertOggToWav } from './media-converter.js';
 
-const handleTextMessageFromTelegram = async (aiBot, eventData) => {
+const handleTextMessageFromTelegram = async (aiBot: OpenAI, eventData) => {
   const { chatId, payload: message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
     console.error(
-      `Invalid event data for ${EVENTS.MESSAGE_FROM_TG}:`,
+      `Invalid event data for ${Events.MESSAGE_FROM_TG}:`,
       eventData
     );
     return;
@@ -29,7 +30,7 @@ const handleTextMessageFromTelegram = async (aiBot, eventData) => {
     await saveMessageToDB({ chatId, message, role });
     await aiBot.send({ chatId, message });
   } catch (error) {
-    console.error(`Error handling event ${EVENTS.MESSAGE_FROM_TG}:`, error);
+    console.error(`Error handling event ${Events.MESSAGE_FROM_TG}:`, error);
   }
 };
 
@@ -37,7 +38,7 @@ const handleMessageFromLLM = async (telegramBot, eventData) => {
   const { chatId, message, role } = eventData || {};
 
   if (!chatId || !message || !role) {
-    console.error(`Invalid event data for ${EVENTS.MESSAGE_TO_TG}:`, eventData);
+    console.error(`Invalid event data for ${Events.MESSAGE_TO_TG}:`, eventData);
     return;
   }
 
@@ -50,7 +51,7 @@ const handleMessageFromLLM = async (telegramBot, eventData) => {
       await telegramBot.send({ chatId, message: chunk });
     }
   } catch (error) {
-    console.error(`Error handling event ${EVENTS.MESSAGE_TO_TG}:`, error);
+    console.error(`Error handling event ${Events.MESSAGE_TO_TG}:`, error);
   }
 };
 
@@ -59,15 +60,15 @@ export const startEventListeners = services => {
 
   telegramBot.startListeners();
 
-  eventEmitter.on(EVENTS.MESSAGE_FROM_TG, eventData =>
+  eventEmitter.on(Events.MESSAGE_FROM_TG, eventData =>
     handleTextMessageFromTelegram(aiBot, eventData)
   );
 
-  eventEmitter.on(EVENTS.VOICE_MESSAGE_FROM_TG, async eventData => {
+  eventEmitter.on(Events.VOICE_MESSAGE_FROM_TG, async eventData => {
     const { chatId, payload: fileId, role } = eventData || {};
     if (!chatId || !fileId || !role) {
       console.error(
-        `Invalid event data for ${EVENTS.VOICE_MESSAGE_FROM_TG}:`,
+        `Invalid event data for ${Events.VOICE_MESSAGE_FROM_TG}:`,
         eventData
       );
       return;
@@ -85,7 +86,7 @@ export const startEventListeners = services => {
     try {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
-      const fileName = createFileName(chatId, EXTENSIONS.OGG);
+      const fileName = createFileName(chatId, Extensions.OGG);
       const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
       await convertOggToWav(filePath);
@@ -96,20 +97,20 @@ export const startEventListeners = services => {
     }
   });
 
-  eventEmitter.on(EVENTS.MESSAGE_TO_TG, eventData =>
+  eventEmitter.on(Events.MESSAGE_TO_TG, eventData =>
     handleMessageFromLLM(telegramBot, eventData)
   );
 
-  eventEmitter.on(EVENTS.CLEAR_CHAT_HISTORY, async chatId => {
+  eventEmitter.on(Events.CLEAR_CHAT_HISTORY, async chatId => {
     deleteChatHistory(chatId);
   });
 
-  eventEmitter.on(EVENTS.LLM_SELECTED, async ({ chatId, model }) => {
+  eventEmitter.on(Events.LLM_SELECTED, async ({ chatId, model }) => {
     console.log(`Selected ${model} for chat ${chatId}`);
     updateLLM(chatId, model);
   });
 
-  eventEmitter.on(EVENTS.SHOW_CURRENT_LLM, async chatId => {
+  eventEmitter.on(Events.SHOW_CURRENT_LLM, async chatId => {
     const model = await getCurrentModelName(chatId);
 
     telegramBot.send({
