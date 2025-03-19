@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { convertBlobToBuffer } from './index.js';
+import { convertBlobToBuffer } from './index';
 
 const { TELEGRAM_API_TOKEN: token, TELEGRAM_API_URL: baseUrl } = process.env;
 
