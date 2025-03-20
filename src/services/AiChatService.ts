@@ -16,16 +16,13 @@ class AIChatService {
     this.eventEmitter = eventEmitter;
   }
 
-  async send(chatId: string) {
+  async send(chatId: number) {
     try {
       const options = await this.getChatOptions(chatId);
 
-      const { error, choices } =
-        await this.bot.chat.completions.create(options);
+      const completion = await this.bot.chat.completions.create(options);
 
-      if (error) throw new Error(`${error.message}: code ${error.code}`);
-
-      const messageContent = choices[0]?.message?.content;
+      const messageContent = completion.choices[0]?.message?.content;
 
       if (messageContent) {
         this.emit(chatId, messageContent);
@@ -36,7 +33,7 @@ class AIChatService {
     }
   }
 
-  async getChatOptions(chatId: string) {
+  async getChatOptions(chatId: number) {
     const currentModelName: string = await getCurrentModelName(chatId);
 
     const chatHistory = await getChatHistory(chatId);
@@ -58,7 +55,7 @@ class AIChatService {
     return { model: currentModelName, messages };
   }
 
-  emit(chatId: string, message: string | ErrorMessages): void {
+  emit(chatId: number, message: string | ErrorMessages): void {
     this.eventEmitter.emit(Events.MESSAGE_TO_TG, {
       chatId,
       message,
