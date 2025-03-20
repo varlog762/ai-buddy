@@ -15,7 +15,7 @@ import {
   formatMarkdownMessageToHtml,
 } from '../utils/index.js';
 import EventEmitter from 'node:events';
-import { TelegramSendMessageOptions } from '../types/telegram-send-method.options';
+import { TelegramSendMessageOptions } from '../types/telegram-send-method-options';
 
 class TelegramBotService {
   typingIndicatorTimer: NodeJS.Timeout | null = null;
