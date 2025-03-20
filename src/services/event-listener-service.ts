@@ -1,4 +1,4 @@
-import { Events, SystemMessages, Extensions } from '../enums';
+import { Events, SystemMessages, Formats, AiModels } from '../enums';
 import {
   saveMessageToDB,
   updateLLM,
@@ -93,7 +93,7 @@ export const startEventListeners = services => {
     try {
       const buffer = await getBufferFromTelegramVoiceMessage(fileId);
 
-      const fileName = createFileName(chatId, Extensions.OGG);
+      const fileName = createFileName(chatId, Formats.OGG);
       const filePath = getAbsoluteFilePath('audio', fileName);
       await saveFileStream(buffer, fileName);
       await convertOggToWav(filePath);
@@ -108,16 +108,19 @@ export const startEventListeners = services => {
     handleMessageFromLLM(telegramBot, eventData)
   );
 
-  eventEmitter.on(Events.CLEAR_CHAT_HISTORY, async chatId => {
+  eventEmitter.on(Events.CLEAR_CHAT_HISTORY, async (chatId: number) => {
     deleteChatHistory(chatId);
   });
 
-  eventEmitter.on(Events.LLM_SELECTED, async ({ chatId, model }) => {
-    console.log(`Selected ${model} for chat ${chatId}`);
-    updateLLM(chatId, model);
-  });
+  eventEmitter.on(
+    Events.LLM_SELECTED,
+    async ({ chatId, model }: { chatId: number; model: AiModels }) => {
+      console.log(`Selected ${model} for chat ${chatId}`);
+      updateLLM(chatId, model);
+    }
+  );
 
-  eventEmitter.on(Events.SHOW_CURRENT_LLM, async chatId => {
+  eventEmitter.on(Events.SHOW_CURRENT_LLM, async (chatId: string) => {
     const model = await getCurrentModelName(chatId);
 
     telegramBot.send({

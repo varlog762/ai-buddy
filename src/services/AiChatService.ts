@@ -1,10 +1,6 @@
 import OpenAI from 'openai';
 import { Events, ChatRoles, ErrorMessages } from '../enums';
-import {
-  getCurrentModelName,
-  getChatHistory,
-  getCurrentSystemMessage,
-} from './supabase.js';
+import { getCurrentModelName, getChatHistory } from './supabase.js';
 import EventEmitter from 'node:events';
 
 class AIChatService {
@@ -34,11 +30,9 @@ class AIChatService {
   }
 
   async getChatOptions(chatId: number) {
-    const currentModelName: string = await getCurrentModelName(chatId);
+    const currentModelName = await getCurrentModelName(chatId);
 
     const chatHistory = await getChatHistory(chatId);
-
-    const currentSystemMessage = await getCurrentSystemMessage(chatId);
 
     if (!currentModelName) {
       throw new Error(ErrorMessages.FALSY_LLM_NAME);
@@ -48,11 +42,7 @@ class AIChatService {
       throw new Error(ErrorMessages.CHAT_DATA);
     }
 
-    const messages = currentSystemMessage
-      ? [currentSystemMessage, ...chatHistory]
-      : chatHistory;
-
-    return { model: currentModelName, messages };
+    return { model: currentModelName, messages: chatHistory };
   }
 
   emit(chatId: number, message: string | ErrorMessages): void {

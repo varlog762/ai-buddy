@@ -29,7 +29,6 @@ class TelegramBotService {
 
   startListeners(): void {
     this.startListenMessages();
-
     this.startListenUserSelection();
   }
 
@@ -129,11 +128,7 @@ class TelegramBotService {
     }
   }
 
-  async send({
-    chatId,
-    message,
-    inlineKeyboard = {},
-  }: TelegramSendMessageOptions) {
+  async send(chatId: number, message: string, inlineKeyboard = {}) {
     this.stopTypingIndicator();
 
     try {
