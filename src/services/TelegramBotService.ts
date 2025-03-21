@@ -1,4 +1,8 @@
-import TelegramBot, { ChatAction } from 'node-telegram-bot-api';
+import EventEmitter from 'node:events';
+import TelegramBot, {
+  ChatAction,
+  InlineKeyboardMarkup,
+} from 'node-telegram-bot-api';
 import {
   SystemMessages,
   ChatCommands,
@@ -14,8 +18,6 @@ import {
   isModel,
   formatMarkdownMessageToHtml,
 } from '../utils/index.js';
-import EventEmitter from 'node:events';
-import { TelegramSendMessageOptions } from '../types/telegram-send-method-options';
 
 class TelegramBotService {
   typingIndicatorTimer: NodeJS.Timeout | null = null;
@@ -90,23 +92,19 @@ class TelegramBotService {
   handleCommands(chatId: number, message: ChatCommands) {
     const commandActions: Record<ChatCommands, () => void> = {
       [ChatCommands.START]: () =>
-        this.send({
-          chatId,
-          message: SystemMessages.START,
-          inlineKeyboard: inlineKeyboards.defaultOption,
-        }),
+        this.send(chatId, SystemMessages.START, inlineKeyboards.defaultOption),
       [ChatCommands.CLEAR_CHAT_HISTORY]: () =>
-        this.send({
+        this.send(
           chatId,
-          message: SystemMessages.DELETE_CHAT_HISTORY_CONFIRMATION,
-          inlineKeyboard: inlineKeyboards.clearChatHistory,
-        }),
+          SystemMessages.DELETE_CHAT_HISTORY_CONFIRMATION,
+          inlineKeyboards.clearChatHistory
+        ),
       [ChatCommands.CHANGE_MODEL]: () =>
-        this.send({
+        this.send(
           chatId,
-          message: SystemMessages.CHOOSE_MODEL,
-          inlineKeyboard: inlineKeyboards.modelSelection,
-        }),
+          SystemMessages.CHOOSE_MODEL,
+          inlineKeyboards.modelSelection
+        ),
       [ChatCommands.SHOW_MODEL]: () =>
         this.emit(Events.SHOW_CURRENT_LLM, chatId),
     };
@@ -128,14 +126,20 @@ class TelegramBotService {
     }
   }
 
-  async send(chatId: number, message: string, inlineKeyboard = {}) {
+  async send(
+    chatId: number,
+    message: string,
+    inlineKeyboard?: InlineKeyboardMarkup
+  ) {
     this.stopTypingIndicator();
 
     try {
-      return await this.bot.sendMessage(chatId, message, {
-        parse_mode: Formats.HTML,
-        ...inlineKeyboard,
-      });
+      const options: TelegramBot.SendMessageOptions = {
+        parse_mode: Formats.HTML as const,
+        reply_markup: inlineKeyboard,
+      };
+
+      return await this.bot.sendMessage(chatId, message, options);
     } catch (error) {
       await this.handleErrorSendingMessage(
         error,
@@ -214,11 +218,11 @@ class TelegramBotService {
 
   async handleStartCommandSelection(chatId: number, userSelection: string) {
     if (userSelection === 'change-model') {
-      this.send({
+      this.send(
         chatId,
-        message: SystemMessages.CHOOSE_MODEL,
-        inlineKeyboard: inlineKeyboards.modelSelection,
-      });
+        SystemMessages.CHOOSE_MODEL,
+        inlineKeyboards.modelSelection
+      );
     }
   }
 
@@ -227,10 +231,10 @@ class TelegramBotService {
     userSelection: string | undefined
   ) {
     const formattedSelection = formatMarkdownMessageToHtml(userSelection);
-    await this.send({
+    await this.send(
       chatId,
-      message: `You have selected the model: ${formattedSelection}`,
-    });
+      `You have selected the model: ${formattedSelection}`
+    );
 
     this.emit(Events.LLM_SELECTED, { chatId, model: userSelection });
   }
